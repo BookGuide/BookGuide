@@ -1,0 +1,67 @@
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows Installer directory
+_InstDir
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Dd]Release/
+[Dd]ebug-x86/
+[Dd]ebug-x64/
+[Dd]Release-x86/
+[Dd]Release-x64/
+x64/
+x86/
+x64/Release/
+x86/Release/
+x64/Debug/
+x86/Debug/
+
+# Uncomment if you have tasks that create project's project's output
+# bin/
+# obj/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# User-specific files for JetBrains Rider
+.idea/
+
+# User-specific files for Visual Studio for Mac
+.vscode/
+
+# Npm package manager
+node_modules/
+
+# Yarn package manager
+.yarn/
+
+# .NET Core/ASP.NET Core build output directories
+bin/
+obj/
+
+# JetBrains Rider project files
+.idea/
+
+# ASP.NET Core / MVC
+wwwroot/
