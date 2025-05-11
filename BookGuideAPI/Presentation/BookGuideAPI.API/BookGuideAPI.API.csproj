@@ -14,4 +14,9 @@
     <Folder Include="Controllers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Infrastructure\BookGuideAPI.Infrastructure\BookGuideAPI.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\BookGuideAPI.Persistence\BookGuideAPI.Persistence.csproj" />
+  </ItemGroup>
+
 </Project>
