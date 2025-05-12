@@ -8,7 +8,7 @@ namespace BookGuideAPI.Domain.Enums
 {
     public enum User_Role
     {
-        Normal,
-        Admin
+        Admin,
+        Normal
     }
 }
