@@ -53,14 +53,6 @@ namespace BookGuideAPI.Persistence.Contexts
                 .HasOne(ob => ob.Book)
                 .WithOne(b => b.OnlineBook)
                 .HasForeignKey<OnlineBook>(ob => ob.BookId);
-
-            modelBuilder.Entity<User>()
-                .Property(u => u.Role)
-                .HasConversion<string>();
-
-            modelBuilder.Entity<Book>()
-                .Property(b => b.Category)
-                .HasConversion<string>();
         }
     }
 }
