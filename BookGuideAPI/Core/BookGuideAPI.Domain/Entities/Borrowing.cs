@@ -1,4 +1,5 @@
 ﻿using BookGuideAPI.Domain.Entities.Common;
+using BookGuideAPI.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
