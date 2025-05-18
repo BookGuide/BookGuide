@@ -10,7 +10,7 @@ namespace BookGuideAPI.Domain.Entities
     public class OnlineBook : BaseEntity
     {
         public required Guid BookId { get; set; }
-        public required string FilePath { get; set; }
+        public required string FileId { get; set; }
 
         public Book Book { get; set; }
     }
