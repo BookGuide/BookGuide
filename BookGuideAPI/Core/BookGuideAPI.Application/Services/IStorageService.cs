@@ -10,7 +10,7 @@ namespace BookGuideAPI.Application.Services
     public interface IStorageService
     {
         Task<UploadResult> UploadAsync(Upload upload);
-        Task<byte[]> GetAsync(string fileName);
-        Task<bool> DeleteAsync(string fileName);
+        Task<byte[]> GetAsync(string fileId);
+        Task<bool> DeleteAsync(string fileId);
     }
 }
