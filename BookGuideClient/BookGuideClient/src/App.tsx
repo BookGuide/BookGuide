@@ -1,8 +1,26 @@
 import React from 'react';
-import AppRouter from "./router/AppRouter"
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import LoginPage from './pages/login/LoginPage';
+import RegisterPage from './pages/register/RegisterPage';
+
+// Modern router configuration
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <LoginPage />,
+  },
+  {
+    path: '/login',
+    element: <LoginPage />,
+  },
+  {
+    path: '/register',
+    element: <RegisterPage />,
+  },
+]);
 
 function App() {
-  return <AppRouter/>;
+  return <RouterProvider router={router} />;
 }
 
 export default App;
