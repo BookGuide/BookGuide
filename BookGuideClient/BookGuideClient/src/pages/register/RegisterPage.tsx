@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, BookOpen, User, Lock, Mail, UserPlus, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, User, Lock, Mail, UserPlus, ArrowLeft } from 'lucide-react';
 
 const RegisterPage = () => {
   const [fullName, setFullName] = useState('');
