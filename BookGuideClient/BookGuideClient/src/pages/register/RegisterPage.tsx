@@ -58,12 +58,6 @@ const RegisterPage = () => {
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url(${bookshelfImageUrl})`,
         }}
       >
-        <div className="flex flex-col justify-center items-center h-full p-8 text-white">
-          <h1 className="text-4xl font-bold mb-4 drop-shadow-lg">Kütüphane Sistemi</h1>
-          <p className="text-xl text-center max-w-md drop-shadow-md">
-            Kitaplarınızı yönetin, okuma deneyiminizi geliştirin, bilgi dünyasına açılın.
-          </p>
-        </div>
       </div>
       
       {/* Sağ Taraf - Kayıt Formu */}
