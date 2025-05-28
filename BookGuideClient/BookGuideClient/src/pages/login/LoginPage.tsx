@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, BookOpen, ChevronLeft, LogIn } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ChevronLeft, LogIn } from 'lucide-react';
 import type { FormEvent, MouseEvent, ChangeEvent } from 'react';
 
 const LoginPage: React.FC = () => {
