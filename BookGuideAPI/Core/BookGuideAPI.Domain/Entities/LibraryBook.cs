@@ -14,7 +14,8 @@ namespace BookGuideAPI.Domain.Entities
         public int TotalCount { get; set; }
         public int AvailableCount { get; set; }
 
-        public Book Book { get; set; }
-        public Library Library { get; set; }
+        public Book Book { get; set; } = null!;
+        public Library Library { get; set; } = null!;
     }
+
 }

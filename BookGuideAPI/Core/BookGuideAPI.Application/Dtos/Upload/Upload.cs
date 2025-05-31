@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BookGuideAPI.Application.Dtos
+namespace BookGuideAPI.Application.Dtos.Upload
 {
     public class Upload
     {

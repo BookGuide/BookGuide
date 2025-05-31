@@ -9,10 +9,10 @@ namespace BookGuideAPI.Domain.Entities
 {
     public class Library : BaseEntity
     {
-        public required string Name { get; set; }
-        public required string Address { get; set; }
+        public string Name { get; set; } = null!;
+        public string Address { get; set; } = null!;
 
-        public ICollection<LibraryBook> LibraryBooks { get; set; }
-        public ICollection<Borrowing> Borrowings { get; set; }
+        public ICollection<LibraryBook> LibraryBooks { get; set; } = new List<LibraryBook>();
+        public ICollection<Borrowing> Borrowings { get; set; } = new List<Borrowing>();
     }
 }

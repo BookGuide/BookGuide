@@ -1,18 +1,19 @@
 ﻿using BookGuideAPI.Application.Dtos;
+using BookGuideAPI.Application.Dtos.Upload;
 using BookGuideAPI.Application.Services;
-using Google.Apis.Auth.OAuth2;
+/*using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
-using Google.Apis.Upload;
+using Google.Apis.Upload;*/
 using System;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace BookGuideAPI.Infrastructure.Services
 {
-    public class StorageService : IStorageService
+    public class StorageService //: IStorageService
     {
-        private readonly DriveService _driveService;
+        /*private readonly DriveService _driveService;
 
         public StorageService()
         {
@@ -34,7 +35,7 @@ namespace BookGuideAPI.Infrastructure.Services
 
         public async Task<UploadResult> UploadAsync(Upload upload)
         {
-            byte[] fileBytes = Convert.FromBase64String(upload.FileBytes);
+            /*byte[] fileBytes = Convert.FromBase64String(upload.FileBytes);
 
             var fileMetadata = new Google.Apis.Drive.v3.Data.File
             {
@@ -79,6 +80,6 @@ namespace BookGuideAPI.Infrastructure.Services
             {
                 return false;
             }
-        }
+        }*/
     }
 }

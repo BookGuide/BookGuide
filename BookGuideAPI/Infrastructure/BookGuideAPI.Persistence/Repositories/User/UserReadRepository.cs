@@ -24,5 +24,10 @@ namespace BookGuideAPI.Persistence.Repositories
         {
             return await Table.FirstOrDefaultAsync(u => u.Username == username && u.HashedPassword == hashedPassword);
         }
+
+        public async Task<bool> ChechkUsernameAndEmailAsync(string username, string email)
+        {
+            return await Table.AnyAsync(u => u.Username == username || u.Email == email);
+        }
     }
 }

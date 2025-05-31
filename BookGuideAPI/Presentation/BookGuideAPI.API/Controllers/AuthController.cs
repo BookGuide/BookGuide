@@ -1,52 +1,28 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using BookGuideAPI.Application.Features.Command.User.LoginUser;
+using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using BookGuideAPI.Application.DTOs;
-using BookGuideAPI.Application.Interfaces;
 
 namespace BookGuideAPI.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly IMediator _mediator;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IMediator mediator)
         {
-            _authService = authService;
+            _mediator = mediator;
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequestDto request)
+        [HttpPost]
+        public async Task<IActionResult> Login([FromBody] LoginUserCommandRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _authService.LoginAsync(request.Email, request.Password);
-            
-            if (!result.Success)
-                return BadRequest(result.Message);
-
-            return Ok(result);
-        }
-
-        [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await _authService.RegisterAsync(
-                request.FullName,
-                request.Email,
-                request.Password
-            );
-
-            if (!result.Success)
-                return BadRequest(result.Message);
-
-            return Ok(result);
+            LoginUserCommandResponse response = await _mediator.Send(request);
+            return Ok(response);
         }
     }
 }
