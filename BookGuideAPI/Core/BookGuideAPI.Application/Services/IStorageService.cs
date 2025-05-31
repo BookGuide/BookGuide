@@ -1,4 +1,5 @@
 ﻿using BookGuideAPI.Application.Dtos;
+using BookGuideAPI.Application.Dtos.Upload;
 using System;
 using System.Collections.Generic;
 using System.Linq;
