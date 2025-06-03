@@ -353,7 +353,7 @@ const BookList: React.FC = () => {
         </div>
       </main>
 
-      {/* Footer */}
+      {/* footer */}
       <footer className="bg-white py-6 border-t border-gray-200 mt-auto"> {/* mt-auto ile footer'ı aşağıya sabitler */}
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
