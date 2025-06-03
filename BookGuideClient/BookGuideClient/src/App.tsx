@@ -6,6 +6,11 @@ import MainMenu from './pages/mainmenu/MainMenu';
 import HistoryPage from './pages/historypage/HistoryPage'
 import MyProfile from './pages/myprofile/MyProfile';
 import RecommendationPage from './pages/recommendation/RecommendationPage';
+import AdminPage from './pages/adminpage/AdminPage';
+import BookList from './pages/booklist/BookList'; // BookListPage'i import et
+import LibraryList from './pages/librarylist/LibraryList';
+import BorrowList from './pages/borrowlist/BorrowList';
+
 
 
 
@@ -40,6 +45,24 @@ const router = createBrowserRouter([
     {
     path: '/mainmenu',
     element: <MainMenu />,
+  },
+
+  
+    {
+    path: '/adminpage',
+    element: <AdminPage />,
+  },
+    { // Yeni eklenen rota
+    path: '/booklist',
+    element: <BookList />,
+  },
+      { // Yeni eklenen rota
+    path: '/librarylist',
+    element: <LibraryList />,
+  },
+        { // Yeni eklenen rota
+    path: '/borrowlist',
+    element: <BorrowList />,
   },
 ]);
 

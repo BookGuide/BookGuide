@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, User, Lock, Mail, UserPlus, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, User, Lock, Mail, UserPlus, ArrowLeft, UserCog } from 'lucide-react';
 
 const RegisterPage = () => {
-  const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -11,12 +11,20 @@ const RegisterPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
+  // Backend User_Role enum'una karşılık gelen roller
+  const userRoleOptions = [
+    { value: "Normal", label: "Kullanıcı" },
+    { value: "Admin", label: "Admin" },
+    { value: "Library", label: "Kütüphane" },
+  ];
+  const [selectedRole, setSelectedRole] = useState<string>(userRoleOptions[0].value); // Varsayılan olarak "Normal"
+
   const navigate = useNavigate(); // React Router'dan navigate fonksiyonu
 
   const handleRegister = () => {
     // Form validation
-    if (!fullName || !email || !password || !confirmPassword) {
+    if (!username || !email || !password || !confirmPassword || !selectedRole) {
       setError('Lütfen tüm alanları doldurunuz.');
       return;
     }
@@ -29,10 +37,22 @@ const RegisterPage = () => {
     setError('');
     setIsLoading(true);
     
-    // Simulating API call
+    // Simulating API call with data structure matching backend User entity
+    const registrationData = {
+      username: username,
+      email: email,
+      password: password, // Backend will handle hashing
+      role: selectedRole, // Seçilen rolü ekle
+      // Role and LibraryId would typically be handled by the backend
+      // or set in a different part of the application (e.g., admin panel)
+    };
+
     setTimeout(() => {
       setIsLoading(false);
+      console.log('Gönderilen Kayıt Verisi:', registrationData);
       alert('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.');
+      // Gerçek API çağrısı burada yapılacak:
+      // fetch('/api/users/register', { method: 'POST', body: JSON.stringify(registrationData), headers: {'Content-Type': 'application/json'} })
       // React Router ile yönlendirme
       navigate('/login');
     }, 1500);
@@ -81,19 +101,19 @@ const RegisterPage = () => {
 
           {/* Kayıt Formu */}
           <div className="mb-4">
-            <label htmlFor="fullName" className="block text-sm font-medium text-[#472425] mb-1">
-              Ad Soyad
+            <label htmlFor="username" className="block text-sm font-medium text-[#472425] mb-1">
+              Kullanıcı Adı
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <User size={18} className="text-[#8c1c13]/70" />
               </div>
               <input
-                id="fullName"
+                id="username"
                 type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Adınız Soyadınız"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Kullanıcı adınız"
                 className="pl-10 w-full px-4 py-2 border border-[#8c1c13]/20 rounded-md focus:ring-2 focus:ring-[#8c1c13] focus:border-[#8c1c13]"
               />
             </div>
@@ -176,6 +196,29 @@ const RegisterPage = () => {
                   <Eye size={18} className="text-[#8c1c13]/70" />
                 )}
               </button>
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <label htmlFor="role" className="block text-sm font-medium text-[#472425] mb-1">
+              Kullanıcı Rolü
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <UserCog size={18} className="text-[#8c1c13]/70" />
+              </div>
+              <select
+                id="role"
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="pl-10 w-full px-4 py-2 border border-[#8c1c13]/20 rounded-md focus:ring-2 focus:ring-[#8c1c13] focus:border-[#8c1c13] bg-white appearance-none"
+              >
+                {userRoleOptions.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
