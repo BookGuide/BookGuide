@@ -48,7 +48,6 @@ namespace BookGuideAPI.Application.Features.Query.LibraryBook.GetLibraryBook
                     .Where(br => br.LibraryId == libraryBook.LibraryId && br.BookId == libraryBook.BookId)
                     .Select(br => new BookBorrowingRecordViewModel
                     {
-                        UserId = br.UserId,
                         Username = br.User.Username,
                         StartDate = br.StartDate,
                         EndDate = br.EndDate,
