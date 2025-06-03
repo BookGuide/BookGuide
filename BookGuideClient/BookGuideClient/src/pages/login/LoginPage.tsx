@@ -1,31 +1,23 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ChevronLeft, LogIn } from 'lucide-react';
+import { User, Lock, Eye, EyeOff, ChevronLeft, LogIn } from 'lucide-react';
 import type { FormEvent, MouseEvent, ChangeEvent } from 'react';
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState<string>('');
+  const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  
+
   const handleLogin = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
     // Form validation
-    if (!email.trim() || !password.trim()) {
+    if (!username.trim() || !password.trim()) {
       setError('Lütfen tüm alanları doldurunuz.');
       return;
     }
 
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError('Lütfen geçerli bir e-posta adresi giriniz.');
-      return;
-    }
-
-    // Password length validation
     if (password.length < 6) {
       setError('Şifre en az 6 karakter olmalıdır.');
       return;
@@ -33,7 +25,7 @@ const LoginPage: React.FC = () => {
 
     setError('');
     setIsLoading(true);
-    
+
     // Simulating API call
     setTimeout(() => {
       setIsLoading(false);
@@ -66,13 +58,12 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-row bg-gray-100">
       {/* Sol Taraf - Resim Bölümü */}
-      <div 
-        className="hidden md:block w-1/2 bg-cover bg-center" 
+      <div
+        className="hidden md:block w-1/2 bg-cover bg-center"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), url(${bookshelfImageUrl})`,
         }}
       >
-
         <div className="flex flex-col justify-center items-center h-full p-8 text-white">
           <h1 className="text-4xl font-bold mb-4 drop-shadow-lg">Kütüphane Sistemi</h1>
           <p className="text-xl text-center max-w-md drop-shadow-md">
@@ -80,7 +71,7 @@ const LoginPage: React.FC = () => {
           </p>
         </div>
       </div>
-      
+
       {/* Sağ Taraf - Giriş Formu */}
       <div className="w-full md:w-1/2 flex items-center justify-center p-4 md:p-8 bg-[#f4efe8]">
         <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-8 border border-[#8c1c13]/20">
@@ -103,34 +94,34 @@ const LoginPage: React.FC = () => {
           {/* Giriş Formu */}
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#472425] mb-1">
-                E-posta Adresi <span className="text-red-500">*</span>
+              <label htmlFor="username" className="block text-sm font-medium text-[#472425] mb-1">
+                Kullanıcı Adı <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail size={18} className="text-[#8c1c13]/70" />
+                  <User size={18} className="text-[#8c1c13]/70" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={email}
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                  autoComplete="email"
-                  placeholder="ornek@mail.com"
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={username}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) => setUsername(e.target.value)}
+                  autoComplete="username"
+                  placeholder="Kullanıcı adınız"
                   required
                   aria-describedby={error ? "error-message" : undefined}
                   className="pl-10 w-full px-4 py-2 border border-[#8c1c13]/20 rounded-md focus:ring-2 focus:ring-[#8c1c13] focus:border-[#8c1c13] transition-all duration-200"
                 />
               </div>
             </div>
-            
+
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label htmlFor="password" className="block text-sm font-medium text-[#472425]">
                   Şifre <span className="text-red-500">*</span>
                 </label>
-                <button 
+                <button
                   type="button"
                   onClick={handleForgotPassword}
                   className="text-xs font-medium text-[#8c1c13] hover:text-[#630000] hover:underline transition-colors focus:outline-none focus:underline"
@@ -168,7 +159,7 @@ const LoginPage: React.FC = () => {
                 </button>
               </div>
             </div>
-            
+
             <button
               type="button"
               onClick={(e) => handleLogin(e as any)}
@@ -186,12 +177,12 @@ const LoginPage: React.FC = () => {
               )}
             </button>
           </div>
-          
+
           {/* Kayıt Bağlantısı */}
           <div className="mt-6 text-center">
             <p className="text-[#5f4b44]">
               Hesabınız yok mu?{" "}
-              <button 
+              <button
                 onClick={handleRegister}
                 className="text-[#8c1c13] hover:text-[#630000] font-medium transition-colors focus:outline-none focus:underline"
                 tabIndex={0}
@@ -200,10 +191,10 @@ const LoginPage: React.FC = () => {
               </button>
             </p>
           </div>
-          
+
           {/* Geri Dön Butonu */}
           <div className="mt-6 flex justify-center">
-            <button 
+            <button
               onClick={handleBackToHome}
               className="flex items-center text-[#5f4b44] hover:text-[#8c1c13] transition-colors focus:outline-none"
               tabIndex={0}
@@ -212,7 +203,7 @@ const LoginPage: React.FC = () => {
               Ana Sayfaya Dön
             </button>
           </div>
-          
+
           {/* Alt Bilgi */}
           <div className="mt-6 text-center text-[#5f4b44]/80 text-sm">
             &copy; {new Date().getFullYear()} Kütüphane Yönetim Sistemi. Tüm hakları saklıdır.
