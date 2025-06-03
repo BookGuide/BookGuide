@@ -1,4 +1,5 @@
 ﻿using BookGuideAPI.Application.Repositories;
+using BookGuideAPI.Application.Services;
 using BookGuideAPI.Domain.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,18 +10,24 @@ namespace BookGuideAPI.Application.Features.Command.LibraryBook.AddLibraryBook
     {
         private readonly ILibraryBookWriteRepository _libraryBookWriteRepository;
         private readonly ILibraryBookReadRepository _libraryBookReadRepository;
+        private readonly IUserContext _userContext;
 
         public AddLibraryBookCommandHandler(
             ILibraryBookWriteRepository libraryBookWriteRepository,
-            ILibraryBookReadRepository libraryBookReadRepository)
+            ILibraryBookReadRepository libraryBookReadRepository,
+            IUserContext userContext)
         {
             _libraryBookWriteRepository = libraryBookWriteRepository;
             _libraryBookReadRepository = libraryBookReadRepository;
+            _userContext = userContext;
         }
 
         public async Task<AddLibraryBookCommandResponse> Handle(AddLibraryBookCommandRequest request, CancellationToken cancellationToken)
         {
-            if (await _libraryBookReadRepository.ExistsAsync(request.BookId, request.LibraryId))
+            var libraryId = _userContext.LibraryId;
+            if(libraryId == null) return new AddLibraryBookCommandResponse { Succeeded = false };
+
+            if (await _libraryBookReadRepository.ExistsAsync(request.BookId, (Guid)libraryId))
             {
                 return new AddLibraryBookCommandResponse
                 {
@@ -32,7 +39,7 @@ namespace BookGuideAPI.Application.Features.Command.LibraryBook.AddLibraryBook
             {
                 Id = Guid.NewGuid(),
                 BookId = request.BookId,
-                LibraryId = request.LibraryId,
+                LibraryId = (Guid)libraryId,
                 TotalCount = request.TotalCount,
                 AvailableCount = request.AvailableCount
             };

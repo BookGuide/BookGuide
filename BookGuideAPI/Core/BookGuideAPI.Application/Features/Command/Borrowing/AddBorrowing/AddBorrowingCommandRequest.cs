@@ -11,7 +11,6 @@ namespace BookGuideAPI.Application.Features.Command.Borrowing.AddBorrowing
 {
     public class AddBorrowingCommandRequest : IRequest<AddBorrowingCommandResponse>
     {
-        public Guid UserId { get; set; }
         public Guid BookId { get; set; }
         public Guid LibraryId { get; set; }
 

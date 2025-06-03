@@ -20,9 +20,9 @@ namespace BookGuideAPI.Persistence.Repositories
 
         public DbSet<User> Table => _context.Set<User>();
 
-        public async Task<User> CheckLoginCredentialsAsync(string username, string hashedPassword)
+        public async Task<User> CheckLoginCredentialsAsync(string username)
         {
-            return await Table.FirstOrDefaultAsync(u => u.Username == username && u.HashedPassword == hashedPassword);
+            return await Table.FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<bool> ChechkUsernameAndEmailAsync(string username, string email)
