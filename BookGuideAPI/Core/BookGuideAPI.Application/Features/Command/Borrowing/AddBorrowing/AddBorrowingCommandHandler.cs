@@ -1,4 +1,5 @@
 ﻿using BookGuideAPI.Application.Repositories;
+using BookGuideAPI.Application.Services;
 using BookGuideAPI.Domain.Entities;
 using BookGuideAPI.Domain.Enums;
 using MediatR;
@@ -11,19 +12,25 @@ namespace BookGuideAPI.Application.Features.Command.Borrowing.AddBorrowing
         private readonly IBorrowingWriteRepository _borrowingWriteRepository;
         private readonly IBookReadRepository _bookReadRepository;
         private readonly IBookWriteRepository _bookWriteRepository;
+        private readonly IUserContext _userContext;
 
         public AddBorrowingCommandHandler(
             IBorrowingWriteRepository borrowingWriteRepository,
             IBookReadRepository bookReadRepository,
-            IBookWriteRepository bookWriteRepository)
+            IBookWriteRepository bookWriteRepository,
+            IUserContext userContext)
         {
             _borrowingWriteRepository = borrowingWriteRepository;
             _bookReadRepository = bookReadRepository;
             _bookWriteRepository = bookWriteRepository;
+            _userContext = userContext;
         }
 
         public async Task<AddBorrowingCommandResponse> Handle(AddBorrowingCommandRequest request, CancellationToken cancellationToken)
         {
+            var userId = _userContext.UserId;
+
+            if(userId == null) return new AddBorrowingCommandResponse { Succeeded = false };
             var book = await _bookReadRepository.GetEntityByIdAsync(request.BookId);
 
             if (book == null)

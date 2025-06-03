@@ -1,6 +1,11 @@
 using BookGuideAPI.Application;
 using BookGuideAPI.Infrastructure;
 using BookGuideAPI.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Options;
+using System.Text;
+using BookGuideAPI.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +16,25 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>
 {
@@ -36,8 +60,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseMiddleware<UserContextMiddleware>();
+
 app.MapControllers();
 
 app.Run();
 
-// TODO: Add UserContext, Add Drive File Management
+// TODO: Add Drive File Management, Add Library user

@@ -1,4 +1,5 @@
 ﻿using BookGuideAPI.Application.Repositories;
+using BookGuideAPI.Application.Services;
 using BookGuideAPI.Application.ViewModel;
 using MediatR;
 using System;
@@ -12,17 +13,21 @@ namespace BookGuideAPI.Application.Features.Query.Borrowing.GetUsersBorrowing
     public class GetUsersBorrowingQueryHandler : IRequestHandler<GetUsersBorrowingQueryRequest, GetUsersBorrowingQueryResponse>
     {
         private readonly IBorrowingReadRepository _borrowingReadRepository;
+        private readonly IUserContext _userContext;
 
-        public GetUsersBorrowingQueryHandler(IBorrowingReadRepository borrowingReadRepository)
+        public GetUsersBorrowingQueryHandler(IBorrowingReadRepository borrowingReadRepository, IUserContext userContext)
         {
             _borrowingReadRepository = borrowingReadRepository;
+            _userContext = userContext;
         }
 
         public async Task<GetUsersBorrowingQueryResponse> Handle(GetUsersBorrowingQueryRequest request, CancellationToken cancellationToken)
         {
-            var userId = Guid.NewGuid(); // TODO: replace with actual userId
+            var userId = _userContext.UserId;
 
-            var borrowings = await _borrowingReadRepository.GetUsersBorrowingAsync(userId);
+            if (userId == null) return new GetUsersBorrowingQueryResponse { Succeeded = false };
+
+            var borrowings = await _borrowingReadRepository.GetUsersBorrowingAsync((Guid)userId);
 
             var borrowingViewModels = borrowings.Select(b => new BorrowingViewModel
             {
