@@ -17,7 +17,7 @@ interface BookItem {
   description: string;
   category: string; // Backend'deki enum'ı string olarak temsil ediyoruz
   isOnline: boolean;
-  fileId?: string | null; // Online ise dosya ID'si
+  fileName?: string | null; // Online ise dosya adı
 }
 
 // Örnek Kategori seçenekleri (Backend'deki Book_Category enum'una göre düzenlenmeli)
@@ -35,34 +35,44 @@ const bookCategories = [
 const BookList: React.FC = () => {
   // Örnek kitap verileri (Gerçek uygulamada API'den gelecektir)
   const [books, setBooks] = useState<BookItem[]>([
-    { id: '1', title: 'Suç ve Ceza', author: 'Fyodor Dostoyevski', description: 'Rus edebiyatının önemli eserlerinden...', category: 'Roman', isOnline: false, fileId: null },
-    { id: '2', title: '1984', author: 'George Orwell', description: 'Distopik bir gelecek tasviri...', category: 'Bilim Kurgu', isOnline: true, fileId: 'file-abc-123' },
-    { id: '3', title: 'Hayvan Çiftliği', author: 'George Orwell', description: 'Politik hiciv...', category: 'Roman', isOnline: false, fileId: null },
-    { id: '4', title: 'Sefiller', author: 'Victor Hugo', description: 'Fransız Devrimi sonrası yaşamlar...', category: 'Roman', isOnline: true, fileId: 'file-xyz-789' },
+    { id: '1', title: 'Suç ve Ceza', author: 'Fyodor Dostoyevski', description: 'Rus edebiyatının önemli eserlerinden...', category: 'Roman', isOnline: false, fileName: null },
+    { id: '2', title: '1984', author: 'George Orwell', description: 'Distopik bir gelecek tasviri...', category: 'Bilim Kurgu', isOnline: true, fileName: '1984_ebook.pdf' },
+    { id: '3', title: 'Hayvan Çiftliği', author: 'George Orwell', description: 'Politik hiciv...', category: 'Roman', isOnline: false, fileName: null },
+    { id: '4', title: 'Sefiller', author: 'Victor Hugo', description: 'Fransız Devrimi sonrası yaşamlar...', category: 'Roman', isOnline: true, fileName: 'sefiller_online.epub' },
   ]);
 
   // Yeni kitap ekleme formu için state
-  const [newBook, setNewBook] = useState<Omit<BookItem, 'id'>>({
+  const [newBook, setNewBook] = useState<Omit<BookItem, 'id'> & { selectedFile: File | null }>({
     title: '',
     author: '',
     description: '',
     category: bookCategories[0], // Varsayılan kategori
     isOnline: false,
-    fileId: ''
+    fileName: null,
+    selectedFile: null,
   });
   const [showAddForm, setShowAddForm] = useState(false); // Ekleme formunu gösterme/gizleme
 
 // Form input değişikliklerini yönetme (text, number, select, textarea)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked; // Checkbox için
 
-    setNewBook(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-      // Eğer online değilse fileId'yi temizle
-      ...(name === 'isOnline' && !checked && { fileId: '' })
-    }));
+    if (type === 'file') {
+      const file = (e.target as HTMLInputElement).files?.[0] || null;
+      setNewBook(prev => ({
+        ...prev,
+        selectedFile: file,
+        fileName: file ? file.name : null,
+      }));
+    } else {
+      const checked = (e.target as HTMLInputElement).checked; // Checkbox için
+      setNewBook(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value,
+        // Eğer online değilse seçili dosyayı ve dosya adını temizle
+        ...(name === 'isOnline' && !checked && { selectedFile: null, fileName: null })
+      }));
+    }
   };
 
   // Yeni kitap ekleme
@@ -72,26 +82,38 @@ const BookList: React.FC = () => {
       alert('Lütfen başlık, yazar, açıklama ve kategori alanlarını doldurun.');
       return;
     }
-    if (newBook.isOnline && !newBook.fileId) {
-      alert('Online kitap için Dosya ID gereklidir.');
+    if (newBook.isOnline && !newBook.selectedFile) {
+      alert('Online kitap için bir dosya seçmelisiniz.');
       return;
     }
 
     const bookToAdd: BookItem = {
       id: (Date.now() + Math.random()).toString(), // Geçici ID, backend'den gerçek ID gelecek
-      ...newBook,
-      fileId: newBook.isOnline ? newBook.fileId : null,
+      title: newBook.title,
+      author: newBook.author,
+      description: newBook.description,
+      category: newBook.category,
+      isOnline: newBook.isOnline,
+      fileName: newBook.isOnline && newBook.selectedFile ? newBook.selectedFile.name : null,
     };
     setBooks(prevBooks => [...prevBooks, bookToAdd]);
-    setNewBook({ title: '', author: '', description: '', category: bookCategories[0], isOnline: false, fileId: '' }); // Formu temizle
+    setNewBook({ // Formu temizle
+      title: '',
+      author: '',
+      description: '',
+      category: bookCategories[0],
+      isOnline: false,
+      fileName: null,
+      selectedFile: null
+    });
     setShowAddForm(false); // Formu gizle
     alert('Kitap başarıyla eklendi.');
   };
 
   // Kitap silme
-  const handleDeleteBook = (id: number) => {
+  const handleDeleteBook = (id: string) => {
     if (window.confirm('Bu kitabı silmek istediğinizden emin misiniz?')) {
-      setBooks(prevBooks => prevBooks.filter(book => book.id !== id.toString())); // ID string olduğu için toString()
+      setBooks(prevBooks => prevBooks.filter(book => book.id !== id));
       alert('Kitap başarıyla silindi.');
     }
   };
@@ -214,16 +236,18 @@ const BookList: React.FC = () => {
               </div>
               {newBook.isOnline && (
                 <div>
-                  <label htmlFor="fileId" className="block text-sm font-medium text-gray-700">Dosya ID</label>
+                  <label htmlFor="bookFile" className="block text-sm font-medium text-gray-700">Kitap Dosyası</label>
                   <input
-                    type="text"
-                    name="fileId"
-                    id="fileId"
-                    value={newBook.fileId || ''}
+                    type="file"
+                    name="bookFile" // Name attribute is important for handleInputChange if used generally
+                    id="bookFile"
                     onChange={handleInputChange}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#660000] focus:border-[#660000] sm:text-sm"
-                    placeholder="Online kitap için dosya ID'si"
-                    required={newBook.isOnline}
+                    className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-[#660000] focus:border-[#660000]
+                               file:mr-4 file:py-2 file:px-4
+                               file:rounded-md file:border-0
+                               file:text-sm file:font-semibold
+                               file:bg-[#6e2b2b] file:text-white hover:file:bg-[#8c1c13]"
+                    accept=".pdf,.epub,.mobi,.txt" // Örnek dosya türleri
                   />
                 </div>
               )}
@@ -238,7 +262,8 @@ const BookList: React.FC = () => {
                       description: '',
                       category: bookCategories[0],
                       isOnline: false,
-                      fileId: ''
+                      fileName: null,
+                      selectedFile: null
                     });
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#660000]"
@@ -274,7 +299,7 @@ const BookList: React.FC = () => {
                   Online Durumu
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Dosya ID
+                  Dosya Adı
                 </th>
                 <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                   İşlemler
@@ -302,11 +327,11 @@ const BookList: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-700">{book.fileId || '-'}</div>
+                      <div className="text-sm text-gray-700">{book.fileName || '-'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <button
-                        onClick={() => handleDeleteBook(parseInt(book.id))} // handleDeleteBook number bekliyor, düzeltilmeli veya id string olmalı
+                        onClick={() => handleDeleteBook(book.id)}
                         className="text-red-600 hover:text-red-800 transition-colors duration-150"
                         title="Sil"
                       >
