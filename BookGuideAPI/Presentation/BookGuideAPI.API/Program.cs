@@ -6,16 +6,26 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Options;
 using System.Text;
 using BookGuideAPI.API.Middleware;
+using BookGuideAPI.Application.Dtos.Token;
+using BookGuideAPI.API.Swagger;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+builder.Services.Configure<TokenOptions>(
+    builder.Configuration.GetSection("TokenOptions")
+);
 builder.Services.AddApplicationServices();
 builder.Services.AddPersistenceServices();
 builder.Services.AddInfrastructureServices();
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SupportNonNullableReferenceTypes();
+    c.OperationFilter<FileUploadOperationFilter>();
+});
 
 builder.Services.AddAuthentication(options =>
 {

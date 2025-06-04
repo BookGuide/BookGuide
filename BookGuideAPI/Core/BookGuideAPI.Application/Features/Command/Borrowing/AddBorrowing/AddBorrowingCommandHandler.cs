@@ -65,7 +65,7 @@ namespace BookGuideAPI.Application.Features.Command.Borrowing.AddBorrowing
             var borrowing = new Domain.Entities.Borrowing
             {
                 Id = Guid.NewGuid(),
-                UserId = request.UserId,
+                UserId = (Guid)userId,
                 BookId = request.BookId,
                 LibraryId = request.LibraryId,
                 StartDate = request.StartDate,
