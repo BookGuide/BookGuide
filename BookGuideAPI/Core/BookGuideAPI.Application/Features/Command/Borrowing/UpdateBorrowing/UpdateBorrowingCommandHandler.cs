@@ -1,19 +1,20 @@
 ﻿using BookGuideAPI.Application.Repositories;
 using MediatR;
+using Microsoft.AspNetCore.Routing.Constraints;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace BookGuideAPI.Application.Features.Command.Borrowing.DeleteBorrowing
 {
-    public class DeleteBorrowingCommandHandler : IRequestHandler<DeleteBorrowingCommandRequest, DeleteBorrowingCommandResponse>
+    public class UpdateBorrowingCommandHandler : IRequestHandler<UpdateBorrowingCommandRequest, UpdateBorrowingCommandResponse>
     {
         private readonly IBorrowingReadRepository _borrowingReadRepository;
         private readonly IBorrowingWriteRepository _borrowingWriteRepository;
         private readonly ILibraryBookReadRepository _libraryBookReadRepository;
         private readonly ILibraryBookWriteRepository _libraryBookWriteRepository;
 
-        public DeleteBorrowingCommandHandler(
+        public UpdateBorrowingCommandHandler(
             IBorrowingWriteRepository borrowingWriteRepository,
             IBorrowingReadRepository borrowingReadRepository,
             ILibraryBookReadRepository libraryBookReadRepository,
@@ -25,12 +26,12 @@ namespace BookGuideAPI.Application.Features.Command.Borrowing.DeleteBorrowing
             _libraryBookWriteRepository = libraryBookWriteRepository;
         }
 
-        public async Task<DeleteBorrowingCommandResponse> Handle(DeleteBorrowingCommandRequest request, CancellationToken cancellationToken)
+        public async Task<UpdateBorrowingCommandResponse> Handle(UpdateBorrowingCommandRequest request, CancellationToken cancellationToken)
         {
             var borrowing = await _borrowingReadRepository.GetEntityByIdAsync(request.Id);
             if (borrowing == null)
             {
-                return new DeleteBorrowingCommandResponse
+                return new UpdateBorrowingCommandResponse
                 {
                     Succeeded = false,
                 };
@@ -45,10 +46,12 @@ namespace BookGuideAPI.Application.Features.Command.Borrowing.DeleteBorrowing
                 await _libraryBookWriteRepository.SaveChangesAsync();
             }
 
-            await _borrowingWriteRepository.DeleteAsync(borrowing.Id);
+            borrowing.Status = Domain.Enums.Borrowing_Status.Completed;
+
+            await _borrowingWriteRepository.UpdateAsync(borrowing);
             await _borrowingWriteRepository.SaveChangesAsync();
 
-            return new DeleteBorrowingCommandResponse
+            return new UpdateBorrowingCommandResponse
             {
                 Succeeded = true,
             };
