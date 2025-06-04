@@ -10,12 +10,14 @@ namespace BookGuideAPI.Application.Features.Command.User.LoginUser
         private readonly IUserReadRepository _userReadRepository;
         private readonly TokenService _tokenService;
         private readonly HashPassword _hashPassword;
+        private readonly ILibraryReadRepository _libraryReadRepository;
 
-        public LoginUserCommandHandler(IUserReadRepository userReadRepository, TokenService tokenService, HashPassword hashPassword)
+        public LoginUserCommandHandler(IUserReadRepository userReadRepository, TokenService tokenService, HashPassword hashPassword, ILibraryReadRepository libraryReadRepository)
         {
             _userReadRepository = userReadRepository;
             _tokenService = tokenService;
             _hashPassword = hashPassword;
+            _libraryReadRepository = libraryReadRepository;
         }
 
         public async Task<LoginUserCommandResponse> Handle(LoginUserCommandRequest request, CancellationToken cancellationToken)
@@ -32,7 +34,11 @@ namespace BookGuideAPI.Application.Features.Command.User.LoginUser
 
             if (!(await _hashPassword.VerifyPasswordAsync(request.RawPassword, user.HashedPassword))) return new LoginUserCommandResponse { Succeeded = false };
 
-            var token = _tokenService.GenerateToken(user.Id, user.Username, user.Role);
+            var libraryId = await _libraryReadRepository.GetLibraryIdByNameAsync(request.LibraryName);
+
+            if (libraryId == null) return new LoginUserCommandResponse { Succeeded = false };
+
+            var token = _tokenService.GenerateToken(user.Id, user.Username, user.Role, libraryId);
 
             var currentUser = new CurrentUserViewModel
             {

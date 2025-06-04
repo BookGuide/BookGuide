@@ -9,5 +9,6 @@ namespace BookGuideAPI.Application.Repositories
 {
     public interface ILibraryReadRepository : IReadRepository<Library>
     {
+        public Task<Guid> GetLibraryIdByNameAsync(string LibraryName);
     }
 }
