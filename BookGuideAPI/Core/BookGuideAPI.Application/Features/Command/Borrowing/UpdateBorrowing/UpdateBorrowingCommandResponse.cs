@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BookGuideAPI.Application.Features.Command.Borrowing.DeleteBorrowing
 {
-    public class DeleteBorrowingCommandResponse
+    public class UpdateBorrowingCommandResponse
     {
         public bool Succeeded { get; set; }
     }

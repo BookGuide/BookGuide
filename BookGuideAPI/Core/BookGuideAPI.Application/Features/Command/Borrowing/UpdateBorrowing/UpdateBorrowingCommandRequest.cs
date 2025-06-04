@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BookGuideAPI.Application.Features.Command.Borrowing.DeleteBorrowing
 {
-    public class DeleteBorrowingCommandRequest : IRequest<DeleteBorrowingCommandResponse>
+    public class UpdateBorrowingCommandRequest : IRequest<UpdateBorrowingCommandResponse>
     {
         public Guid Id { get; set; }
     }
