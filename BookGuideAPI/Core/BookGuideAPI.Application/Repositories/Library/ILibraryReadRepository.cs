@@ -1,4 +1,4 @@
-﻿using BookGuideAPI.Domain.Entities;
+using BookGuideAPI.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,6 @@ namespace BookGuideAPI.Application.Repositories
 {
     public interface ILibraryReadRepository : IReadRepository<Library>
     {
-        public Task<Guid> GetLibraryIdByNameAsync(string LibraryName);
+        public Task<List<string>> GetLibraryNamesAsync();
     }
 }

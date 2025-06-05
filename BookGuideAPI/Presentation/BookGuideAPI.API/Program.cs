@@ -7,25 +7,25 @@ using Microsoft.Extensions.Options;
 using System.Text;
 using BookGuideAPI.API.Middleware;
 using BookGuideAPI.Application.Dtos.Token;
-using BookGuideAPI.API.Swagger;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services
+    .AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
-builder.Services.Configure<TokenOptions>(
-    builder.Configuration.GetSection("TokenOptions")
-);
+builder.Services.Configure<TokenOptions>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddApplicationServices();
 builder.Services.AddPersistenceServices();
 builder.Services.AddInfrastructureServices();
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SupportNonNullableReferenceTypes();
-    c.OperationFilter<FileUploadOperationFilter>();
-});
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -44,6 +44,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
+
 builder.Services.AddAuthorization();
 
 builder.Services.AddCors(options =>

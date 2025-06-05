@@ -24,10 +24,8 @@ namespace BookGuideAPI.Application.Features.Command.LibraryBook.AddLibraryBook
 
         public async Task<AddLibraryBookCommandResponse> Handle(AddLibraryBookCommandRequest request, CancellationToken cancellationToken)
         {
-            var libraryId = _userContext.LibraryId;
-            if(libraryId == null) return new AddLibraryBookCommandResponse { Succeeded = false };
 
-            if (await _libraryBookReadRepository.ExistsAsync(request.BookId, (Guid)libraryId))
+            if (await _libraryBookReadRepository.ExistsAsync(request.BookId, request.LibraryId))
             {
                 return new AddLibraryBookCommandResponse
                 {
@@ -39,7 +37,7 @@ namespace BookGuideAPI.Application.Features.Command.LibraryBook.AddLibraryBook
             {
                 Id = Guid.NewGuid(),
                 BookId = request.BookId,
-                LibraryId = (Guid)libraryId,
+                LibraryId = request.LibraryId,
                 TotalCount = request.TotalCount,
                 AvailableCount = request.AvailableCount
             };

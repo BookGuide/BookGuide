@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 namespace BookGuideAPI.Domain.Enums
 {
     public enum User_Role
-    {
-        Admin,
+    { 
         Normal,
+        Admin,
         Library
     }
 }

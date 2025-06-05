@@ -1,9 +1,10 @@
-﻿using BookGuideAPI.Application.Repositories;
+using BookGuideAPI.Application.Repositories;
 using BookGuideAPI.Domain.Entities;
 using BookGuideAPI.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,14 +19,14 @@ namespace BookGuideAPI.Persistence.Repositories
             _context = context;
         }
 
-        DbSet<Library> Table => _context.Set<Library>();
+        public DbSet<Library> Table => _context.Set<Library>();
 
-        public Task<Guid> GetLibraryIdByNameAsync(string LibraryName)
+        public async Task<List<string>> GetLibraryNamesAsync()
         {
-            return Table
-                .Where(l => l.Name == LibraryName)
-                .Select(l => l.Id)
-                .FirstOrDefaultAsync();
+            return await Table
+                .AsNoTracking()
+                .Select(library => library.Name)
+                .ToListAsync();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace BookGuideAPI.Application.Features.Query.Book.GetBooks
         }
         public async Task<GetBooksQueryResponse> Handle(GetBooksQueryRequest request, CancellationToken cancellationToken)
         {
-            var books = await _bookReadRepository.GetAllAsync();
+            var books = await _bookReadRepository.GetAllBooksAsync();
 
             if (books == null || !books.Any())
             {
@@ -35,8 +35,10 @@ namespace BookGuideAPI.Application.Features.Query.Book.GetBooks
                 Author = book.Author,
                 Description = book.Description,
                 Category = book.Category,
-                Is_Online = book.IsOnline
+                Is_Online = book.IsOnline,
+                FileId = book.IsOnline && book.OnlineBook != null ? book.OnlineBook.FileId : null
             }).ToList();
+
 
             return new GetBooksQueryResponse
             {

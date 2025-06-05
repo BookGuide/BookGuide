@@ -1,4 +1,4 @@
-﻿using BookGuideAPI.Application.Dtos;
+using BookGuideAPI.Application.Dtos;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
+using System.Security;
 using System.Threading.Tasks;
 
 namespace BookGuideAPI.Controllers

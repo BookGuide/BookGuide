@@ -1,4 +1,5 @@
 ﻿using BookGuideAPI.Application.Features.Command.Book.AddBook;
+using BookGuideAPI.Application.Features.Command.Book.DeleteBook;
 using BookGuideAPI.Application.Features.Query.Book.GetBook;
 using BookGuideAPI.Application.Features.Query.Book.GetBooks;
 using MediatR;
@@ -38,6 +39,13 @@ namespace BookGuideAPI.API.Controllers
         public async Task<IActionResult> GetBooks([FromQuery] GetBooksQueryRequest request)
         {
             GetBooksQueryResponse response = await _mediator.Send(request);
+            return Ok(response);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteBook([FromBody] DeleteBookCommandRequest request)
+        {
+            DeleteBookCommandResponse response = await _mediator.Send(request);
             return Ok(response);
         }
 

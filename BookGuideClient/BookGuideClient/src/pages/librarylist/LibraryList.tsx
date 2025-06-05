@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BookOpen,
@@ -6,65 +6,107 @@ import {
   Settings,
   PlusCircle,
   Trash2,
-  LibraryBig, // Kütüphane listesi başlığı için ikon
+  LibraryBig
 } from 'lucide-react';
 
-// Kütüphane verisi için arayüz
 interface LibraryItem {
-  id: string; // Backend'den Guid string olarak gelecek
+  id: string;
   name: string;
   address: string;
 }
 
 const LibraryList: React.FC = () => {
-  // Örnek kütüphane verileri (Gerçek uygulamada API'den gelecektir)
-  const [libraries, setLibraries] = useState<LibraryItem[]>([
-    { id: 'lib1', name: 'Merkez Kütüphanesi', address: 'Ana Cadde No:123, Şehir Merkezi' },
-    { id: 'lib2', name: 'Şehir Kütüphanesi', address: 'Park Sokak No:45, Şehir Kenarı' },
-    { id: 'lib3', name: 'Çocuk Kütüphanesi', address: 'Okul Yolu Üzeri No:7, İlçe' },
-  ]);
-
-  // Yeni kütüphane ekleme formu için state
+  const [libraries, setLibraries] = useState<LibraryItem[]>([]);
   const [newLibrary, setNewLibrary] = useState<Omit<LibraryItem, 'id'>>({
     name: '',
-    address: '',
+    address: ''
   });
-  const [showAddForm, setShowAddForm] = useState(false); // Ekleme formunu gösterme/gizleme
+  const [showAddForm, setShowAddForm] = useState(false);
 
-  // Form input değişikliklerini yönetme (text, textarea)
+  useEffect(() => {
+    const fetchLibraries = async () => {
+      try {
+        const res = await fetch('https://localhost:7127/api/Library/GetLibraries');
+        const data = await res.json();
+        if (data.succeeded && Array.isArray(data.libraries)) {
+          const librariesData: LibraryItem[] = data.libraries.map((lib: any) => ({
+            id: lib.id,
+            name: lib.name,
+            address: lib.address
+          }));
+          setLibraries(librariesData);
+        } else {
+          alert('Kütüphaneler alınamadı.');
+        }
+      } catch (err) {
+        alert('Kütüphaneler yüklenemedi.');
+      }
+    };
+    fetchLibraries();
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewLibrary(prev => ({
       ...prev,
-      [name]: value,
+      [name]: value
     }));
   };
 
-  // Yeni kütüphane ekleme
-  const handleAddLibrary = (e: React.FormEvent) => {
+  const handleAddLibrary = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newLibrary.name || !newLibrary.address) {
       alert('Lütfen kütüphane adı ve adres alanlarını doldurun.');
       return;
     }
 
-    const libraryToAdd: LibraryItem = {
-      id: (Date.now() + Math.random()).toString(), // Geçici ID, backend'den gerçek ID gelecek
-      ...newLibrary,
+    const addLibraryBody = {
+      name: newLibrary.name,
+      address: newLibrary.address
     };
-    setLibraries(prevLibraries => [...prevLibraries, libraryToAdd]);
-    setNewLibrary({ name: '', address: '' }); // Formu temizle
-    setShowAddForm(false); // Formu gizle
-    alert('Kütüphane başarıyla eklendi.');
-  };
 
-  // Kütüphane silme
-  const handleDeleteLibrary = (id: string) => {
-    if (window.confirm('Bu kütüphaneyi silmek istediğinizden emin misiniz?')) {
-      setLibraries(prevLibraries => prevLibraries.filter(library => library.id !== id));
-      alert('Kütüphane başarıyla silindi.');
+    try {
+      const res = await fetch('https://localhost:7127/api/Library/AddLibrary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(addLibraryBody)
+      });
+      const data = await res.json();
+      if (data.succeeded) {
+        window.location.reload();
+      } else {
+        alert('Kütüphane eklenemedi.');
+      }
+    } catch (err) {
+      alert('Kütüphane eklenemedi.');
     }
   };
+
+  const handleDeleteLibrary = async (id: string) => {
+    if (window.confirm('Bu kütüphaneyi silmek istediğinizden emin misiniz?')) {
+      try {
+        const res = await fetch('https://localhost:7127/api/Library/DeleteLibrary', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ libraryId: id })
+        });
+        const data = await res.json();
+        if (data.succeeded) {
+          setLibraries(prev => prev.filter(lib => lib.id !== id));
+          alert('Kütüphane başarıyla silindi.');
+        } else {
+          alert('Kütüphane silinemedi.');
+        }
+      } catch (err) {
+        alert('Kütüphane silinemedi.');
+      }
+    }
+  };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4efe8]">

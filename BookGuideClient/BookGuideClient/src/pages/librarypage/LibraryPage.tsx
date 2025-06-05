@@ -4,7 +4,7 @@ import {
   BookOpen,
   LogOut,
   Settings,
-  Library // Kütüphane ikonu
+  Library
 } from 'lucide-react';
 
 const LibraryPage: React.FC = () => {

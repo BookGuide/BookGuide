@@ -1,4 +1,4 @@
-﻿using BookGuideAPI.Application.Helper;
+using BookGuideAPI.Application.Helper;
 using BookGuideAPI.Application.Repositories;
 using BookGuideAPI.Application.ViewModel;
 using MediatR;
@@ -10,14 +10,12 @@ namespace BookGuideAPI.Application.Features.Command.User.LoginUser
         private readonly IUserReadRepository _userReadRepository;
         private readonly TokenService _tokenService;
         private readonly HashPassword _hashPassword;
-        private readonly ILibraryReadRepository _libraryReadRepository;
 
-        public LoginUserCommandHandler(IUserReadRepository userReadRepository, TokenService tokenService, HashPassword hashPassword, ILibraryReadRepository libraryReadRepository)
+        public LoginUserCommandHandler(IUserReadRepository userReadRepository, TokenService tokenService, HashPassword hashPassword)
         {
             _userReadRepository = userReadRepository;
             _tokenService = tokenService;
             _hashPassword = hashPassword;
-            _libraryReadRepository = libraryReadRepository;
         }
 
         public async Task<LoginUserCommandResponse> Handle(LoginUserCommandRequest request, CancellationToken cancellationToken)
@@ -34,11 +32,7 @@ namespace BookGuideAPI.Application.Features.Command.User.LoginUser
 
             if (!(await _hashPassword.VerifyPasswordAsync(request.RawPassword, user.HashedPassword))) return new LoginUserCommandResponse { Succeeded = false };
 
-            var libraryId = await _libraryReadRepository.GetLibraryIdByNameAsync(request.LibraryName);
-
-            if (libraryId == null) return new LoginUserCommandResponse { Succeeded = false };
-
-            var token = _tokenService.GenerateToken(user.Id, user.Username, user.Role, libraryId);
+            var token = _tokenService.GenerateToken(user.Id, user.Username, user.Role, user.LibraryId);
 
             var currentUser = new CurrentUserViewModel
             {

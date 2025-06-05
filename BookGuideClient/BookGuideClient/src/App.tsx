@@ -7,7 +7,7 @@ import HistoryPage from './pages/historypage/HistoryPage'
 import MyProfile from './pages/myprofile/MyProfile';
 import RecommendationPage from './pages/recommendation/RecommendationPage';
 import AdminPage from './pages/adminpage/AdminPage';
-import BookList from './pages/booklist/BookList'; // BookListPage'i import et
+import BookList from './pages/booklist/BookList';
 import LibraryList from './pages/librarylist/LibraryList';
 import BorrowList from './pages/borrowlist/BorrowList';
 import LibraryPage from './pages/librarypage/LibraryPage';
