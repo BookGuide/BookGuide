@@ -1,4 +1,4 @@
-﻿using BookGuideAPI.Application.Helper;
+using BookGuideAPI.Application.Helper;
 using BookGuideAPI.Application.Repositories;
 using BookGuideAPI.Application.ViewModel;
 using MediatR;

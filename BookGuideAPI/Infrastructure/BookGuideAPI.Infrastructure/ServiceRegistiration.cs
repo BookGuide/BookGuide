@@ -1,4 +1,4 @@
-﻿using BookGuideAPI.Application.Services;
+using BookGuideAPI.Application.Services;
 using BookGuideAPI.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;

@@ -1,4 +1,4 @@
-﻿using BookGuideAPI.Domain.Entities;
+using BookGuideAPI.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -1,19 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, BookOpen } from 'lucide-react';
+import { BookOpen, Search, Loader2, AlertTriangle, List } from 'lucide-react';
+
+// Arama sonuçları için basit bir arayüz
+interface SearchedBook {
+  id: string;
+  title: string;
+  author: string;
+}
+
+// Örnek kitap verileri (arama için kullanılacak)
+const mockAllBooksForSearch: SearchedBook[] = [
+  { id: 's-guid-1', title: 'Suç ve Ceza', author: 'Fyodor Dostoyevski' },
+  { id: 's-guid-2', title: '1984', author: 'George Orwell' },
+  { id: 's-guid-3', title: 'Yüzüklerin Efendisi', author: 'J.R.R. Tolkien' },
+  { id: 's-guid-4', title: 'Küçük Prens', author: 'Antoine de Saint-Exupéry' },
+  { id: 's-guid-5', title: 'Sefiller', author: 'Victor Hugo' },
+  { id: 's-guid-6', title: 'Beyaz Diş', author: 'Jack London' },
+  { id: 's-guid-7', title: 'Simyacı', author: 'Paulo Coelho' },
+];
 
 const MainMenu: React.FC = () => {
-  const [query, setQuery] = useState<string>('');
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Arama yapılıyor:', query);
-  };
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchResults, setSearchResults] = useState<SearchedBook[]>([]);
+  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [searchAttempted, setSearchAttempted] = useState<boolean>(false); // Arama yapılıp yapılmadığını takip eder
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4efe8]">
       {/* Navbar */}
-      <nav className="bg-[#660000]">
+      <nav className="bg-[#660000] shadow-md sticky top-0 z-40">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center">
             <BookOpen size={32} className="text-white mr-2" />
@@ -23,13 +39,31 @@ const MainMenu: React.FC = () => {
           </div>
           <div className="flex items-center space-x-6">
             <Link
+              to="/viewallbooks" // Tüm kitapların listelendiği sayfaya yönlendirme
+              className="text-white hover:text-gray-300 font-medium"
+            >
+              Kitap Listesi
+            </Link>
+            <Link
+              to="/history"
+              className="text-white hover:text-gray-300 font-medium"
+            >
+              Geçmişim
+            </Link>
+            <Link
+              to="/recommendation"
+              className="text-white hover:text-gray-300 font-medium"
+            >
+              Öneriler
+            </Link>
+            <Link
               to="/myprofile"
               className="text-white hover:text-gray-300 font-medium"
             >
               Profilim
             </Link>
             <Link
-              to="/logout"
+              to="/login" // Çıkış yapıldığında login sayfasına yönlendir
               className="text-white hover:text-gray-300 font-medium"
             >
               Çıkış Yap
@@ -39,78 +73,85 @@ const MainMenu: React.FC = () => {
       </nav>
 
       {/* Main Content */}
-      <main className="flex-grow container mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-12">
-        {/* Sol Sütun: Geçmiş ve Öneriler */}
-        <div className="flex flex-col space-y-8">
-          {/* Geçmişte Okunan Kitaplar */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-white bg-opacity-30 backdrop-blur-md rounded-xl" />
-            <section className="relative p-8">
-              <h2 className="text-2xl font-bold text-[#660000] mb-4">
-                Geçmişte Okunan Kitaplar
-              </h2>
-              <p className="text-[#472425] mb-6">
-                Daha önce okuduğunuz kitaplara ve okuma istatistiklerinize buradan
-                ulaşın.
-              </p>
-              <Link
-                to="/history"
-                className="inline-block px-6 py-2 border-2 border-[#660000] rounded-full text-[#660000] font-semibold hover:bg-[#660000] hover:text-white transition-colors"
-              >
-                Geçmişe Göz At
-              </Link>
-            </section>
-          </div>
+      <main className="flex-grow container mx-auto px-6 py-12 flex flex-col items-center justify-center">
+        <div className="text-center w-full max-w-2xl">
+          <h1 className="text-4xl font-bold text-[#660000] mb-4">BookGuide'a Hoş Geldiniz!</h1>
+          <p className="text-lg text-[#472425] mb-8">
+            Kitapları keşfetmek, ödünç almak ve okuma geçmişinizi takip etmek için gezinin.
+          </p>
 
-          {/* Tavsiye Edilen Kitaplar */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-white bg-opacity-30 backdrop-blur-md rounded-xl" />
-            <section className="relative p-8">
-              <h2 className="text-2xl font-bold text-[#660000] mb-4">
-                Tavsiye Edilen Kitaplar
-              </h2>
-              <p className="text-[#472425] mb-6">
-                Okuma geçmişinize ve tercihlerinize göre size özel kitap
-                önerilerini keşfedin.
-              </p>
-              <Link
-                to="/recommendation"
-                className="inline-block px-6 py-2 bg-[#660000] rounded-full text-white font-semibold hover:bg-[#4a0000] transition-colors"
+          {/* Kitap Arama Sekmesi */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setIsSearching(true);
+              setSearchAttempted(true);
+              // API çağrısı simülasyonu
+              setTimeout(() => {
+                if (searchQuery.trim() === '') {
+                  setSearchResults([]);
+                } else {
+                  const filteredBooks = mockAllBooksForSearch.filter(
+                    (book) =>
+                      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      book.author.toLowerCase().includes(searchQuery.toLowerCase())
+                  );
+                  setSearchResults(filteredBooks);
+                }
+                setIsSearching(false);
+              }, 1000);
+            }}
+            className="mb-10 w-full"
+          >
+            <div className="relative flex">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Kitap adı veya yazar ara..."
+                className="w-full pl-4 pr-12 py-3 border border-[#660000]/50 rounded-l-md focus:ring-2 focus:ring-[#660000] focus:border-transparent transition-colors bg-white/90 text-gray-700 placeholder-gray-500"
+              />
+              <button
+                type="submit"
+                className="bg-[#660000] hover:bg-[#800000] text-white px-6 py-3 rounded-r-md flex items-center justify-center transition-colors"
+                disabled={isSearching}
               >
-                Önerileri Görüntüle
-              </Link>
-            </section>
-          </div>
-        </div>
-
-        {/* Sağ Sütun: Kitap Arama */}
-        <div className="relative">
-          <div className="absolute inset-0 bg-white bg-opacity-30 backdrop-blur-md rounded-xl" />
-          <section className="relative p-8 flex flex-col items-center">
-            <h2 className="text-2xl font-bold text-[#660000] mb-4">
-              Kitap Ara
-            </h2>
-            <p className="text-[#472425] mb-6">
-              Aradığınız kitabı başlık, yazar veya konuya göre bulun.
-            </p>
-            <form onSubmit={handleSearch} className="w-full max-w-md mb-8">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search size={20} className="text-[#660000]/70" />
-                </div>
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Kitap ara..."
-                  className="w-full pl-10 pr-4 py-3 border border-[#660000]/30 rounded-full focus:ring-2 focus:ring-[#660000] focus:border-transparent transition-colors"
-                />
-              </div>
-            </form>
-            <div className="w-full max-w-md h-64 border border-[#660000]/30 rounded-lg bg-white/70">
-              {/* Arama sonuçları buraya gelecek */}
+                {isSearching ? <Loader2 size={20} className="animate-spin" /> : <Search size={20} />}
+              </button>
             </div>
-          </section>
+          </form>
+
+          {/* Arama Sonuçları */}
+          {searchAttempted && (
+            <div className="w-full mt-6 mb-8 text-left">
+              {isSearching && (
+                <p className="text-center text-gray-600 flex items-center justify-center"><Loader2 size={24} className="animate-spin mr-2" /> Sonuçlar aranıyor...</p>
+              )}
+              {!isSearching && searchResults.length === 0 && searchQuery.trim() !== '' && (
+                <p className="text-center text-red-600 flex items-center justify-center"><AlertTriangle size={20} className="mr-2"/> Aradığınız kriterlere uygun kitap bulunamadı.</p>
+              )}
+              {!isSearching && searchResults.length > 0 && (
+                <div className="bg-white/80 backdrop-blur-sm shadow-md rounded-lg p-4">
+                  <h3 className="text-xl font-semibold text-[#472425] mb-3 flex items-center"><List size={22} className="mr-2"/>Arama Sonuçları:</h3>
+                  <ul className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                    {searchResults.map((book) => (
+                      <li key={book.id} className="p-3 border-b border-gray-200 last:border-b-0 hover:bg-gray-50 rounded">
+                        <p className="font-medium text-[#5c0000]">{book.title}</p>
+                        <p className="text-sm text-gray-600">{book.author}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          <Link
+            to="/viewallbooks"
+            className="bg-[#660000] hover:bg-[#800000] text-white font-semibold py-3 px-8 rounded-lg shadow-md transition duration-150 ease-in-out text-lg"
+          >
+            Kitapları Görüntüle
+          </Link>
         </div>
       </main>
     </div>

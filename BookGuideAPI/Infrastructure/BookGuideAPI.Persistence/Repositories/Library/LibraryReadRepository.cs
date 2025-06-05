@@ -1,4 +1,4 @@
-﻿using BookGuideAPI.Application.Repositories;
+using BookGuideAPI.Application.Repositories;
 using BookGuideAPI.Domain.Entities;
 using BookGuideAPI.Persistence.Contexts;
 using Microsoft.EntityFrameworkCore;
