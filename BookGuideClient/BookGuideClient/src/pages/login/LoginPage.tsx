@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Lock, Eye, EyeOff, ChevronLeft, LogIn } from 'lucide-react';
 import type { FormEvent, MouseEvent, ChangeEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState<string>('');
@@ -8,8 +9,9 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
+  const navigate = useNavigate();
 
-  const handleLogin = (e: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
     // Form validation
@@ -26,11 +28,52 @@ const LoginPage: React.FC = () => {
     setError('');
     setIsLoading(true);
 
-    // Simulating API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('https://localhost:7127/api/Auth/Login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: username,
+          rawPassword: password
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Sunucudan hata yanıtı alındı.');
+      }
+
+      const data = await response.json();
+
+      if (data.succeeded) {
+        // Token'ı localStorage'a kaydet (ya da cookie'ye)
+        localStorage.setItem('token', data.token);
+
+        // Kullanıcı bilgilerini kaydetmek istersen:
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        
+        if(data.user.role === 'Admin') {
+          alert('Giriş başarılı! Admin sayfasına yönlendiriliyorsunuz...');
+          navigate('/adminpage');
+        } else if(data.user.role === 'User') {
+          alert('Giriş başarılı! Ana menüye yönlendiriliyorsunuz...');
+          navigate('/mainmenu');
+        }
+        else {
+          alert('Giriş başarılı! Kütüphane sayfasına yönlendiriliyorsunuz...');
+          navigate('/librarypage');
+        }
+      } else {
+        setError('Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
       setIsLoading(false);
-      alert('Giriş başarılı! Dashboard sayfasına yönlendiriliyorsunuz...');
-    }, 1500);
+    }
   };
 
   const handleForgotPassword = (e: MouseEvent<HTMLButtonElement>) => {
@@ -40,7 +83,7 @@ const LoginPage: React.FC = () => {
 
   const handleRegister = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    alert('Kayıt sayfasına yönlendiriliyorsunuz...');
+    navigate('/register');
   };
 
   const handleBackToHome = (e: MouseEvent<HTMLButtonElement>) => {

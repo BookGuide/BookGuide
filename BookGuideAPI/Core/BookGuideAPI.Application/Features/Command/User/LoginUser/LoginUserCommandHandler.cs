@@ -32,7 +32,7 @@ namespace BookGuideAPI.Application.Features.Command.User.LoginUser
 
             if (!(await _hashPassword.VerifyPasswordAsync(request.RawPassword, user.HashedPassword))) return new LoginUserCommandResponse { Succeeded = false };
 
-            var token = _tokenService.GenerateToken(user.Id, user.Username, user.Role);
+            var token = _tokenService.GenerateToken(user.Id, user.Username, user.Role, user.LibraryId);
 
             var currentUser = new CurrentUserViewModel
             {

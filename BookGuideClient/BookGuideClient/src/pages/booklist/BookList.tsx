@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BookOpen,
@@ -6,121 +6,206 @@ import {
   Settings,
   PlusCircle,
   Trash2,
-  List // Liste başlığı için veya genel bir ikon olarak
+  List,
+  Eye
 } from 'lucide-react';
 
-// Kitap verisi için arayüz
 interface BookItem {
-  id: string; // Backend'den Guid string olarak gelecek
+  id: string;
   title: string;
   author: string;
   description: string;
-  category: string; // Backend'deki enum'ı string olarak temsil ediyoruz
+  category: string;
   isOnline: boolean;
-  fileName?: string | null; // Online ise dosya adı
+  fileName?: string | null;
+  fileId?: string | null;
+  fileUrl?: string | null;
 }
 
-// Örnek Kategori seçenekleri (Backend'deki Book_Category enum'una göre düzenlenmeli)
-const bookCategories = [
-  "Roman",
-  "Bilim Kurgu",
-  "Tarih",
-  "Eğitim",
-  "Felsefe",
-  "Polisiye",
-  "Çocuk Kitapları",
-  "Diğer"
-];
+const categoryEnumMap: Record<string, string> = {
+  'Roman': 'Fiction',
+  'Bilim Kurgu': 'Science',
+  'Tarih': 'History',
+  'Biyografi': 'Biography',
+  'Fantastik': 'Fantasy',
+  'Romantik': 'Romance',
+  'Polisiye': 'Mystery',
+  'Gerilim': 'Thriller',
+  'Korku': 'Horror',
+  'Kişisel Gelişim': 'SelfHelp',
+  'Felsefe': 'Philosophy',
+  'Sanat': 'Art',
+  'Çocuk Kitapları': 'Poetry',
+  'Seyahat': 'Travel',
+  'Yemek': 'Cooking',
+  'Sağlık': 'Health',
+  'Teknoloji': 'Technology',
+  'İş Dünyası': 'Business',
+  'Eğitim': 'Education',
+  'Diğer': 'NonFiction'
+};
 
 const BookList: React.FC = () => {
-  // Örnek kitap verileri (Gerçek uygulamada API'den gelecektir)
-  const [books, setBooks] = useState<BookItem[]>([
-    { id: '1', title: 'Suç ve Ceza', author: 'Fyodor Dostoyevski', description: 'Rus edebiyatının önemli eserlerinden...', category: 'Roman', isOnline: false, fileName: null },
-    { id: '2', title: '1984', author: 'George Orwell', description: 'Distopik bir gelecek tasviri...', category: 'Bilim Kurgu', isOnline: true, fileName: '1984_ebook.pdf' },
-    { id: '3', title: 'Hayvan Çiftliği', author: 'George Orwell', description: 'Politik hiciv...', category: 'Roman', isOnline: false, fileName: null },
-    { id: '4', title: 'Sefiller', author: 'Victor Hugo', description: 'Fransız Devrimi sonrası yaşamlar...', category: 'Roman', isOnline: true, fileName: 'sefiller_online.epub' },
-  ]);
-
-  // Yeni kitap ekleme formu için state
-  const [newBook, setNewBook] = useState<Omit<BookItem, 'id'> & { selectedFile: File | null }>({
-    title: '',
-    author: '',
-    description: '',
-    category: bookCategories[0], // Varsayılan kategori
-    isOnline: false,
-    fileName: null,
-    selectedFile: null,
-  });
-  const [showAddForm, setShowAddForm] = useState(false); // Ekleme formunu gösterme/gizleme
-
-// Form input değişikliklerini yönetme (text, number, select, textarea)
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-
-    if (type === 'file') {
-      const file = (e.target as HTMLInputElement).files?.[0] || null;
-      setNewBook(prev => ({
-        ...prev,
-        selectedFile: file,
-        fileName: file ? file.name : null,
-      }));
-    } else {
-      const checked = (e.target as HTMLInputElement).checked; // Checkbox için
-      setNewBook(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value,
-        // Eğer online değilse seçili dosyayı ve dosya adını temizle
-        ...(name === 'isOnline' && !checked && { selectedFile: null, fileName: null })
-      }));
-    }
-  };
-
-  // Yeni kitap ekleme
-  const handleAddBook = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newBook.title || !newBook.author || !newBook.description || !newBook.category) {
-      alert('Lütfen başlık, yazar, açıklama ve kategori alanlarını doldurun.');
-      return;
-    }
-    if (newBook.isOnline && !newBook.selectedFile) {
-      alert('Online kitap için bir dosya seçmelisiniz.');
-      return;
-    }
-
-    const bookToAdd: BookItem = {
-      id: (Date.now() + Math.random()).toString(), // Geçici ID, backend'den gerçek ID gelecek
-      title: newBook.title,
-      author: newBook.author,
-      description: newBook.description,
-      category: newBook.category,
-      isOnline: newBook.isOnline,
-      fileName: newBook.isOnline && newBook.selectedFile ? newBook.selectedFile.name : null,
-    };
-    setBooks(prevBooks => [...prevBooks, bookToAdd]);
-    setNewBook({ // Formu temizle
+  const [books, setBooks] = useState<BookItem[]>([]);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newBook, setNewBook] = useState<Omit<BookItem, 'id'> & { selectedFile: File | null }>(
+    {
       title: '',
       author: '',
       description: '',
-      category: bookCategories[0],
+      category: 'Roman',
       isOnline: false,
       fileName: null,
       selectedFile: null
     });
-    setShowAddForm(false); // Formu gizle
-    alert('Kitap başarıyla eklendi.');
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await fetch('https://localhost:7127/api/Book/GetBooks');
+        const data = await res.json();
+        if (data.succeeded && Array.isArray(data.books)) {
+          const booksData: BookItem[] = data.books.map((book: any) => ({
+            id: book.id,
+            title: book.title,
+            author: book.author,
+            description: book.description,
+            category: book.category,
+            isOnline: book.is_Online,
+            fileId: book.fileId || null,
+            fileName: null,
+            fileUrl: null
+          }));
+
+          const booksWithUrls = await Promise.all(
+            booksData.map(async (book) => {
+              if (book.isOnline && book.fileId) {
+                try {
+                  const fileRes = await fetch(`https://localhost:7127/api/File/Get?id=${book.fileId}`);
+                  if (!fileRes.ok) throw new Error();
+                  const fileData = await fileRes.json();
+                  return { ...book, fileName: fileData.fileName, fileUrl: fileData.fileUrl };
+                } catch {
+                  return book;
+                }
+              }
+              return book;
+            })
+          );
+
+          setBooks(booksWithUrls);
+        }
+      } catch (err) {
+        alert('Kitaplar yüklenemedi.');
+      }
+    };
+    fetchBooks();
+  }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setNewBook(prev => ({
+      ...prev,
+      selectedFile: file,
+      fileName: file?.name || null
+    }));
   };
 
-  // Kitap silme
-  const handleDeleteBook = (id: string) => {
-    if (window.confirm('Bu kitabı silmek istediğinizden emin misiniz?')) {
-      setBooks(prevBooks => prevBooks.filter(book => book.id !== id));
-      alert('Kitap başarıyla silindi.');
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setNewBook(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+      ...(name === 'isOnline' && !checked && { selectedFile: null, fileName: null })
+    }));
+  };
+
+  const handleAddBook = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    let fileId = null;
+    if (newBook.isOnline && newBook.selectedFile) {
+      const formData = new FormData();
+      formData.append('file', newBook.selectedFile);
+      try {
+        const uploadRes = await fetch('https://localhost:7127/api/File/Upload', {
+          method: 'POST',
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        fileId = uploadData.fileId;
+      } catch (err) {
+        alert('Dosya yüklenemedi.');
+        return;
+      }
     }
+
+    const addBookBody = {
+      title: newBook.title,
+      author: newBook.author,
+      description: newBook.description,
+      category: categoryEnumMap[newBook.category] || 'NonFiction',
+      isOnline: newBook.isOnline,
+      fileId: fileId
+    };
+
+    try {
+      const res = await fetch('https://localhost:7127/api/Book/AddBook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(addBookBody)
+      });
+      const data = await res.json();
+      if (data.succeeded) {
+        window.location.reload();
+      } else {
+        alert('Kitap eklenemedi.');
+      }
+    } catch (err) {
+      alert('Kitap eklenemedi.');
+    }
+  };
+
+  const handleDeleteBook = async (id: string) => {
+    if (window.confirm('Bu kitabı silmek istediğinizden emin misiniz?')) {
+      try {
+        const res = await fetch('https://localhost:7127/api/Book/DeleteBook', {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ bookId: id })
+        });
+
+        const data = await res.json();
+
+        if (data.succeeded) {
+          setBooks(prevBooks => prevBooks.filter(book => book.id !== id));
+          alert('Kitap başarıyla silindi.');
+        } else {
+          alert('Kitap silinemedi.');
+        }
+      } catch (err) {
+        alert('Silme işlemi sırasında bir hata oluştu.');
+      }
+    }
+  };
+
+  const handleViewFile = (fileId: string | null) => {
+    if (!fileId) return;
+    fetch(`https://localhost:7127/api/File/Get?id=${fileId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.fileUrl) window.open(data.fileUrl, '_blank');
+      })
+      .catch(() => alert('Dosya görüntülenemedi.'));
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4efe8]">
-      {/* Navbar */}
       <header className="bg-[#660000] shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/admin" className="flex items-center">
@@ -148,8 +233,6 @@ const BookList: React.FC = () => {
           </div>
         </div>
       </header>
-
-      {/* Main Content */}
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-[#472425]">
@@ -158,221 +241,77 @@ const BookList: React.FC = () => {
           </h1>
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="bg-[#660000] hover:bg-[#800000] text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-150 ease-in-out flex items-center"
+            className="bg-[#660000] hover:bg-[#800000] text-white font-semibold py-2 px-4 rounded-lg shadow-md flex items-center"
           >
             <PlusCircle size={20} className="mr-2" />
             {showAddForm ? 'Formu Kapat' : 'Yeni Kitap Ekle'}
           </button>
         </div>
 
-        {/* Yeni Kitap Ekleme Formu */}
         {showAddForm && (
-          <div className="bg-white p-6 rounded-lg shadow-lg mb-8">
-            <h2 className="text-2xl font-semibold text-[#472425] mb-4">Yeni Kitap Bilgileri</h2>
-            <form onSubmit={handleAddBook} className="space-y-4">
-              <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700">Başlık</label>
-                <input
-                  type="text"
-                  name="title"
-                  id="title"
-                  value={newBook.title}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#660000] focus:border-[#660000] sm:text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="author" className="block text-sm font-medium text-gray-700">Yazar</label>
-                <input
-                  type="text"
-                  name="author"
-                  id="author"
-                  value={newBook.author}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#660000] focus:border-[#660000] sm:text-sm"
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700">Açıklama</label>
-                <textarea
-                  name="description"
-                  id="description"
-                  value={newBook.description}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#660000] focus:border-[#660000] sm:text-sm"
-                  required
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label htmlFor="category" className="block text-sm font-medium text-gray-700">Kategori</label>
-                <select
-                  name="category"
-                  id="category"
-                  value={newBook.category}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#660000] focus:border-[#660000] sm:text-sm"
-                  required
-                >
-                  {bookCategories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center">
-                <input
-                  id="isOnline"
-                  name="isOnline"
-                  type="checkbox"
-                  checked={newBook.isOnline}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-[#660000] focus:ring-[#660000] border-gray-300 rounded"
-                />
-                <label htmlFor="isOnline" className="ml-2 block text-sm text-gray-900">
-                  Online Kitap mı?
-                </label>
-              </div>
-              {newBook.isOnline && (
-                <div>
-                  <label htmlFor="bookFile" className="block text-sm font-medium text-gray-700">Kitap Dosyası</label>
-                  <input
-                    type="file"
-                    name="bookFile" // Name attribute is important for handleInputChange if used generally
-                    id="bookFile"
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:ring-[#660000] focus:border-[#660000]
-                               file:mr-4 file:py-2 file:px-4
-                               file:rounded-md file:border-0
-                               file:text-sm file:font-semibold
-                               file:bg-[#6e2b2b] file:text-white hover:file:bg-[#8c1c13]"
-                    accept=".pdf,.epub,.mobi,.txt" // Örnek dosya türleri
-                  />
-                </div>
-              )}
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setNewBook({ // Formu iptal edince temizle
-                      title: '',
-                      author: '',
-                      description: '',
-                      category: bookCategories[0],
-                      isOnline: false,
-                      fileName: null,
-                      selectedFile: null
-                    });
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#660000]"
-                >
-                  İptal
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#660000] hover:bg-[#800000] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#660000]"
-                >
-                  Kitabı Kaydet
-                </button>
-              </div>
-            </form>
-          </div>
+          <form onSubmit={handleAddBook} className="bg-white p-6 rounded-lg shadow-md mb-6 space-y-4">
+            <input type="text" name="title" value={newBook.title} onChange={handleInputChange} placeholder="Başlık" className="w-full p-2 border rounded" required />
+            <input type="text" name="author" value={newBook.author} onChange={handleInputChange} placeholder="Yazar" className="w-full p-2 border rounded" required />
+            <textarea name="description" value={newBook.description} onChange={handleInputChange} placeholder="Açıklama" className="w-full p-2 border rounded" rows={3} required />
+            <select name="category" value={newBook.category} onChange={handleInputChange} className="w-full p-2 border rounded" required>
+              {Object.keys(categoryEnumMap).map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
+            <label className="flex items-center space-x-2">
+              <input type="checkbox" name="isOnline" checked={newBook.isOnline} onChange={handleInputChange} />
+              <span>Online Kitap mı?</span>
+            </label>
+            {newBook.isOnline && (
+              <input type="file" accept=".pdf,.epub,.mobi,.txt" onChange={handleFileChange} className="w-full" />
+            )}
+            <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+              Kitabı Kaydet
+            </button>
+          </form>
         )}
 
-        {/* Kitap Listesi Tablosu */}
         <div className="bg-white shadow-xl rounded-lg overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Başlık
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Yazar
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Kategori
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Online Durumu
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Dosya Adı
-                </th>
-                <th scope="col" className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  İşlemler
-                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Başlık</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Yazar</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dosya</th>
+                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">İşlem</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {books.length > 0 ? (
                 books.map((book) => (
-                  <tr key={book.id} className="hover:bg-gray-50 transition-colors duration-150">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{book.title}</div>
+                  <tr key={book.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{book.title}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{book.author}</td>
+                    <td className="px-6 py-4 text-sm text-gray-700">{book.category}</td>
+                    <td className="px-6 py-4 text-sm">
+                      {book.isOnline && book.fileId ? (
+                        <button onClick={() => handleViewFile(book.fileId!)} className="text-blue-600 hover:underline">
+                          Görüntüle
+                        </button>
+                      ) : '-'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-700">{book.author}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-700">{book.category}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        book.isOnline ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {book.isOnline ? 'Evet' : 'Hayır'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-700">{book.fileName || '-'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                      <button
-                        onClick={() => handleDeleteBook(book.id)}
-                        className="text-red-600 hover:text-red-800 transition-colors duration-150"
-                        title="Sil"
-                      >
-                        <Trash2 size={20} />
+                    <td className="px-6 py-4 text-center">
+                      <button onClick={() => handleDeleteBook(book.id)} className="text-red-600 hover:text-red-800">
+                        <Trash2 size={18} />
                       </button>
-                      {/* Düzenleme butonu da buraya eklenebilir */}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
-                    Henüz hiç kitap eklenmemiş.
-                  </td>
+                  <td colSpan={5} className="text-center py-12 text-gray-500">Henüz kitap bulunmamaktadır.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
       </main>
-
-      {/* footer */}
-      <footer className="bg-white py-6 border-t border-gray-200 mt-auto"> {/* mt-auto ile footer'ı aşağıya sabitler */}
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center mb-4 md:mb-0">
-              <BookOpen size={24} className="text-[#660000] mr-2" />
-              <span className="text-lg font-bold text-[#472425]">BookGuide</span>
-            </div>
-            <div className="flex space-x-6">
-              <Link to="/help" className="text-[#5f4b44] hover:text-[#660000]">Yardım</Link>
-              <Link to="/contact" className="text-[#5f4b44] hover:text-[#660000]">İletişim</Link>
-              <Link to="/privacy" className="text-[#5f4b44] hover:text-[#660000]">Gizlilik</Link>
-              <Link to="/terms" className="text-[#5f4b44] hover:text-[#660000]">Kullanım Şartları</Link>
-            </div>
-          </div>
-          <div className="mt-4 text-center text-[#5f4b44]/80 text-sm">
-            &copy; {new Date().getFullYear()} BookGuide. Tüm hakları saklıdır.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

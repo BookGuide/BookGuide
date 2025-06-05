@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, User, Lock, Mail, UserPlus, ArrowLeft, UserCog } from 'lucide-react';
 
@@ -12,18 +12,16 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Backend User_Role enum'una karşılık gelen roller
   const userRoleOptions = [
     { value: "Normal", label: "Kullanıcı" },
     { value: "Admin", label: "Admin" },
     { value: "Library", label: "Kütüphane" },
   ];
-  const [selectedRole, setSelectedRole] = useState<string>(userRoleOptions[0].value); // Varsayılan olarak "Normal"
+  const [selectedRole, setSelectedRole] = useState<string>(userRoleOptions[0].value);
 
-  const navigate = useNavigate(); // React Router'dan navigate fonksiyonu
+  const navigate = useNavigate();
 
-  const handleRegister = () => {
-    // Form validation
+  const handleRegister = async () => {
     if (!username || !email || !password || !confirmPassword || !selectedRole) {
       setError('Lütfen tüm alanları doldurunuz.');
       return;
@@ -36,27 +34,43 @@ const RegisterPage = () => {
 
     setError('');
     setIsLoading(true);
-    
-    // Simulating API call with data structure matching backend User entity
+
     const registrationData = {
       username: username,
       email: email,
-      password: password, // Backend will handle hashing
-      role: selectedRole, // Seçilen rolü ekle
-      // Role and LibraryId would typically be handled by the backend
-      // or set in a different part of the application (e.g., admin panel)
+      rawPassword: password,
+      user_Role: selectedRole
     };
 
-    setTimeout(() => {
+    try {
+      const response = await fetch('https://localhost:7127/api/Auth/SignUp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(registrationData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Sunucudan hata yanıtı alındı.');
+      }
+
+      const data = await response.json();
+
+      if (data.succeeded) {
+        alert('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.');
+        navigate('/login');
+      } else {
+        setError('Kayıt başarısız. Lütfen bilgilerinizi kontrol edin.');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Bir hata oluştu. Lütfen tekrar deneyin.');
+    } finally {
       setIsLoading(false);
-      console.log('Gönderilen Kayıt Verisi:', registrationData);
-      alert('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.');
-      // Gerçek API çağrısı burada yapılacak:
-      // fetch('/api/users/register', { method: 'POST', body: JSON.stringify(registrationData), headers: {'Content-Type': 'application/json'} })
-      // React Router ile yönlendirme
-      navigate('/login');
-    }, 1500);
+    }
   };
+
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);

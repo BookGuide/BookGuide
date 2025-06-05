@@ -7,9 +7,16 @@ import HistoryPage from './pages/historypage/HistoryPage'
 import MyProfile from './pages/myprofile/MyProfile';
 import RecommendationPage from './pages/recommendation/RecommendationPage';
 import AdminPage from './pages/adminpage/AdminPage';
-import BookList from './pages/booklist/BookList'; // BookListPage'i import et
+import BookList from './pages/booklist/BookList';
 import LibraryList from './pages/librarylist/LibraryList';
 import BorrowList from './pages/borrowlist/BorrowList';
+import LibraryPage from './pages/librarypage/LibraryPage';
+import LibraryBorrowPage from './pages/libraryborrowpage/LibraryBorrowPage';
+import LibraryBookList from './pages/librarybooklist/LibraryBookList';
+import ViewAllBooks from './pages/viewallbooks/ViewAllBooks';
+
+
+
 
 
 
@@ -64,6 +71,25 @@ const router = createBrowserRouter([
     path: '/borrowlist',
     element: <BorrowList />,
   },
+          { // Yeni eklenen rota
+    path: '/librarypage',
+    element: <LibraryPage />,
+  },
+            { // Yeni eklenen rota
+    path: '/libraryborrowpage',
+    element: <LibraryBorrowPage />,
+  },
+              { // Yeni eklenen rota
+    path: '/librarybooklist',
+    element: <LibraryBookList />,
+  },
+                { // Yeni eklenen rota
+    path: '/viewallbooks',
+    element: <ViewAllBooks />,
+  },
+
+  
+  
 ]);
 
 function App() {

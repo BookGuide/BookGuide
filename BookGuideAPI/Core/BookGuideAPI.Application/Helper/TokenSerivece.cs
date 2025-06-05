@@ -2,6 +2,7 @@
 using BookGuideAPI.Domain.Entities;
 using BookGuideAPI.Domain.Enums;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
@@ -18,23 +19,27 @@ namespace BookGuideAPI.Application.Helper
     {
         private readonly TokenOptions _options;
 
-        public TokenService(TokenOptions options)
+        public TokenService(IOptions<TokenOptions> options)
         {
-            _options = options;
+            _options = options.Value;
         }
 
-        public string GenerateToken(Guid userId, string username, User_Role role, Guid libraryId)
+        public string GenerateToken(Guid userId, string username, User_Role role, Guid? libraryId)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-            new Claim(ClaimTypes.Name, username),
-            new Claim(ClaimTypes.Role, role.ToString()),
-            new Claim("library_id", libraryId.ToString())
-        };
+                {
+                    new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
+                    new Claim(ClaimTypes.Name, username),
+                    new Claim(ClaimTypes.Role, role.ToString())
+                };
+
+            if (libraryId.HasValue)
+            {
+                claims.Add(new Claim("library_id", libraryId.Value.ToString()));
+            }
 
             var token = new JwtSecurityToken(
                 issuer: _options.Issuer,

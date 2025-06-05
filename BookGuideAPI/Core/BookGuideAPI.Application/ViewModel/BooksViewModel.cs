@@ -15,5 +15,6 @@ namespace BookGuideAPI.Application.ViewModel
         public required string Description { get; set; }
         public required Book_Category Category { get; set; }
         public required bool Is_Online { get; set; }
+        public string FileId { get; set; }
     }
 }

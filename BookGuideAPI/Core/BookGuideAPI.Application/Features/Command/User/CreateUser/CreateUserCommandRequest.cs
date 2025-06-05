@@ -13,5 +13,6 @@ namespace BookGuideAPI.Application.Features.Command.User.CreateUser
         public required string Username { get; set; }
         public required string Email { get; set; }
         public required string RawPassword { get; set; }
+        public required User_Role User_Role { get; set; }
     }
 }

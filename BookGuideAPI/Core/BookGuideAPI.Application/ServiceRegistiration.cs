@@ -15,6 +15,7 @@ namespace BookGuideAPI.Application
             collection.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ServiceRegistration).Assembly));
             collection.AddScoped<HashPassword>();
             collection.AddScoped<TokenService>();
+
         }
     }
 }

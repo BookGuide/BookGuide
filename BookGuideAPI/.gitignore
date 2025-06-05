@@ -65,3 +65,5 @@ obj/
 
 # ASP.NET Core / MVC
 wwwroot/
+
+service-account.json
