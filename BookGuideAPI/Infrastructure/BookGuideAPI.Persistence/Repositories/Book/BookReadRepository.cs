@@ -26,5 +26,14 @@ namespace BookGuideAPI.Persistence.Repositories
                 .Include(b => b.OnlineBook)
                 .ToListAsync();
         }
+
+        public async Task<Book> GetBookWithRelationsByIdAsync(Guid id)
+        {
+            return await _context.Books
+                .Include(b => b.OnlineBook)
+                .Include(b => b.LibraryBooks)
+                    .ThenInclude(lb => lb.Library)
+                .FirstOrDefaultAsync(b => b.Id == id);
+        }
     }
 }

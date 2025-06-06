@@ -42,6 +42,8 @@ namespace BookGuideAPI.Persistence.Repositories
         public Task<List<Borrowing>> GetUsersBorrowingAsync(Guid userId)
         {
             return Table
+                .Include(b => b.Book)
+                .Include(b => b.Library)
                 .Where(b => b.UserId == userId)
                 .ToListAsync();
         }

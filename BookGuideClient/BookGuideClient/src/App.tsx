@@ -14,6 +14,7 @@ import LibraryPage from './pages/librarypage/LibraryPage';
 import LibraryBorrowPage from './pages/libraryborrowpage/LibraryBorrowPage';
 import LibraryBookList from './pages/librarybooklist/LibraryBookList';
 import ViewAllBooks from './pages/viewallbooks/ViewAllBooks';
+import BookDetail from './pages/bookdetail/BookDetail';
 
 
 
@@ -87,6 +88,10 @@ const router = createBrowserRouter([
     path: '/viewallbooks',
     element: <ViewAllBooks />,
   },
+    {
+    path: "/book/:id",
+    element: <BookDetail />,
+  }
 
   
   

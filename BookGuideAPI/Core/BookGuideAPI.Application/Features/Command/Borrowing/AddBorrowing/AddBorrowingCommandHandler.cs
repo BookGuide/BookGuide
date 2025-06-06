@@ -31,7 +31,7 @@ namespace BookGuideAPI.Application.Features.Command.Borrowing.AddBorrowing
             var userId = _userContext.UserId;
 
             if(userId == null) return new AddBorrowingCommandResponse { Succeeded = false };
-            var book = await _bookReadRepository.GetEntityByIdAsync(request.BookId);
+            var book = await _bookReadRepository.GetBookWithRelationsByIdAsync(request.BookId);
 
             if (book == null)
             {
@@ -68,9 +68,10 @@ namespace BookGuideAPI.Application.Features.Command.Borrowing.AddBorrowing
                 UserId = (Guid)userId,
                 BookId = request.BookId,
                 LibraryId = request.LibraryId,
-                StartDate = request.StartDate,
+                StartDate = DateTime.UtcNow,
                 EndDate = request.EndDate,
-                Status = Borrowing_Status.Active
+                Status = Borrowing_Status.Active,
+                CreatedAt = DateTime.UtcNow,
             };
 
             await _borrowingWriteRepository.AddAsync(borrowing);

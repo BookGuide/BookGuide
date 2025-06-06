@@ -14,30 +14,23 @@ const RecommendationPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#f4efe8]">
       {/* Navbar */}
-      <nav className="bg-[#660000]">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <BookOpen size={32} className="text-white mr-2" />
-            <Link to="/mainmenu" className="text-2xl font-bold text-white">
-              BookGuide
-            </Link>
-          </div>
-          <div className="flex items-center space-x-6">
-            <Link
-              to="/profile"
-              className="text-white hover:text-gray-300 font-medium"
-            >
-              Profilim
-            </Link>
-            <Link
-              to="/logout"
-              className="text-white hover:text-gray-300 font-medium"
-            >
-              Çıkış Yap
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <nav className="bg-[#660000] shadow-md sticky top-0 z-40">
+              <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div className="flex items-center">
+                  <BookOpen size={32} className="text-white mr-2" />
+                  <Link to="/mainmenu" className="text-2xl font-bold text-white">
+                    BookGuide
+                  </Link>
+                </div>
+                <div className="flex items-center space-x-6">
+                  <Link to="/mainmenu" className="text-white hover:text-gray-300 font-medium">Kitap Listesi</Link>
+                  <Link to="/history" className="text-white hover:text-gray-300 font-medium">Geçmişim</Link>
+                  <Link to="/recommendation" className="text-white hover:text-gray-300 font-medium">Öneriler</Link>
+                  <Link to="/myprofile" className="text-white hover:text-gray-300 font-medium">Profilim</Link>
+                  <Link to="/login" className="text-white hover:text-gray-300 font-medium">Çıkış Yap</Link>
+                </div>
+              </div>
+            </nav>
 
       {/* Ana İçerik */}
       <main className="flex-grow container mx-auto px-6 py-12 flex items-center justify-center">
