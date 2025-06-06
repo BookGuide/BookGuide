@@ -13,9 +13,8 @@ namespace BookGuideAPI.Infrastructure
     {
         public static void AddInfrastructureServices(this IServiceCollection services)
         {
-            services.AddScoped<IAIService,AIService>();
+            services.AddHttpClient<IAIService, AIService>();
             services.AddScoped<IUserContext, UserContext>();
         }
-
     }
 }

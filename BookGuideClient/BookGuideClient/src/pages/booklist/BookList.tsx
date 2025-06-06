@@ -63,7 +63,7 @@ const BookList: React.FC = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const res = await fetch('https://localhost:7127/api/Book/GetBooks');
+        const res = await fetch('http://localhost:7127/api/Book/GetBooks');
         const data = await res.json();
         if (data.succeeded && Array.isArray(data.books)) {
           const booksData: BookItem[] = data.books.map((book: any) => ({
@@ -82,7 +82,7 @@ const BookList: React.FC = () => {
             booksData.map(async (book) => {
               if (book.isOnline && book.fileId) {
                 try {
-                  const fileRes = await fetch(`https://localhost:7127/api/File/Get?id=${book.fileId}`);
+                  const fileRes = await fetch(`http://localhost:7127/api/File/Get?id=${book.fileId}`);
                   if (!fileRes.ok) throw new Error();
                   const fileData = await fileRes.json();
                   return { ...book, fileName: fileData.fileName, fileUrl: fileData.fileUrl };
@@ -130,7 +130,7 @@ const BookList: React.FC = () => {
       const formData = new FormData();
       formData.append('file', newBook.selectedFile);
       try {
-        const uploadRes = await fetch('https://localhost:7127/api/File/Upload', {
+        const uploadRes = await fetch('http://localhost:7127/api/File/Upload', {
           method: 'POST',
           body: formData
         });
@@ -152,7 +152,7 @@ const BookList: React.FC = () => {
     };
 
     try {
-      const res = await fetch('https://localhost:7127/api/Book/AddBook', {
+      const res = await fetch('http://localhost:7127/api/Book/AddBook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -173,7 +173,7 @@ const BookList: React.FC = () => {
   const handleDeleteBook = async (id: string) => {
     if (window.confirm('Bu kitabı silmek istediğinizden emin misiniz?')) {
       try {
-        const res = await fetch('https://localhost:7127/api/Book/DeleteBook', {
+        const res = await fetch('http://localhost:7127/api/Book/DeleteBook', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -197,7 +197,7 @@ const BookList: React.FC = () => {
 
   const handleViewFile = (fileId: string | null) => {
     if (!fileId) return;
-    fetch(`https://localhost:7127/api/File/Get?id=${fileId}`)
+    fetch(`http://localhost:7127/api/File/Get?id=${fileId}`)
       .then(res => res.json())
       .then(data => {
         if (data.fileUrl) window.open(data.fileUrl, '_blank');

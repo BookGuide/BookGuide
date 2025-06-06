@@ -22,7 +22,7 @@ const BorrowList = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch('https://localhost:7127/api/Borrowing/GetAllBorrowings');
+        const response = await fetch('http://localhost:7127/api/Borrowing/GetAllBorrowings');
         const data = await response.json();
         if (data.succeeded && Array.isArray(data.borrowings)) {
           setBorrowings(data.borrowings);

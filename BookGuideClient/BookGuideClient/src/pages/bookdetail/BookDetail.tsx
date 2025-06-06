@@ -32,7 +32,7 @@ const BookDetail: React.FC = () => {
     const fetchBookDetails = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`https://localhost:7127/api/Book/GetBook?BookId=${id}`, {
+        const response = await fetch(`http://localhost:7127/api/Book/GetBook?BookId=${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -55,7 +55,7 @@ const BookDetail: React.FC = () => {
   const handleViewFile = async (fileId: string | null) => {
     if (!fileId) return;
     try {
-      const response = await fetch(`https://localhost:7127/api/File/Get?id=${fileId}`);
+      const response = await fetch(`http://localhost:7127/api/File/Get?id=${fileId}`);
       const data = await response.json();
       if (data.fileUrl) {
         window.open(data.fileUrl, '_blank');
@@ -77,7 +77,7 @@ const BookDetail: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`https://localhost:7127/api/Borrowing/AddBorrowing`, {
+      const response = await fetch(`http://localhost:7127/api/Borrowing/AddBorrowing`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ const BookDetail: React.FC = () => {
           <div className="mt-6">
             <button
               className="bg-[#660000] hover:bg-[#800000] text-white px-5 py-3 rounded-md flex items-center transition"
-              onClick={() => handleViewFile(book.fileId)}
+              onClick={() => handleViewFile(book.fileId ?? null)}
             >
               <Eye size={18} className="mr-2" /> Kitabı Görüntüle
             </button>

@@ -21,7 +21,7 @@ namespace BookGuideAPI.Persistence
                 .AddUserSecrets<BookGuideDbContextFactory>()
                 .Build();
 
-            services.AddDbContext<BookGuideDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Scoped);
+            services.AddDbContext<BookGuideDbContext>(options => options.UseSqlServer("Server=my-mssql,1433;Database=BookGuide;User Id=sa;Password=Sifre0134;TrustServerCertificate=True"), ServiceLifetime.Scoped);
 
 
             services.AddScoped<IUserReadRepository, UserReadRepository>();

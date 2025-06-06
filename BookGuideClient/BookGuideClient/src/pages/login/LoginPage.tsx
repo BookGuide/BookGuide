@@ -29,7 +29,7 @@ const LoginPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://localhost:7127/api/Auth/Login', {
+      const response = await fetch('http://localhost:7127/api/Auth/Login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -96,7 +96,7 @@ const LoginPage: React.FC = () => {
   };
 
   // Vite'da resim URL'lerini elde etmek için özelleştirilmiş kod
-  const bookshelfImageUrl = '/src/images/bookshelf.jpg';
+  const bookshelfImageUrl = '../public/images/bookshelf.jpg';
 
   return (
     <div className="min-h-screen flex flex-row bg-gray-100">

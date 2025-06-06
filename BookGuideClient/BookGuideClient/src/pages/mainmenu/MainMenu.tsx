@@ -22,7 +22,7 @@ const MainMenu: React.FC = () => {
     const fetchBooks = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('https://localhost:7127/api/Book/GetBooks', {
+        const response = await fetch('http://localhost:7127/api/Book/GetBooks', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

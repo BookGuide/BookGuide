@@ -27,7 +27,7 @@ const LibraryList: React.FC = () => {
   useEffect(() => {
     const fetchLibraries = async () => {
       try {
-        const res = await fetch('https://localhost:7127/api/Library/GetLibraries');
+        const res = await fetch('http://localhost:7127/api/Library/GetLibraries');
         const data = await res.json();
         if (data.succeeded && Array.isArray(data.libraries)) {
           const librariesData: LibraryItem[] = data.libraries.map((lib: any) => ({
@@ -67,7 +67,7 @@ const LibraryList: React.FC = () => {
     };
 
     try {
-      const res = await fetch('https://localhost:7127/api/Library/AddLibrary', {
+      const res = await fetch('http://localhost:7127/api/Library/AddLibrary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -88,7 +88,7 @@ const LibraryList: React.FC = () => {
   const handleDeleteLibrary = async (id: string) => {
     if (window.confirm('Bu kütüphaneyi silmek istediğinizden emin misiniz?')) {
       try {
-        const res = await fetch('https://localhost:7127/api/Library/DeleteLibrary', {
+        const res = await fetch('http://localhost:7127/api/Library/DeleteLibrary', {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
