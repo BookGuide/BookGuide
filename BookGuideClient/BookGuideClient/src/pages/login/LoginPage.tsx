@@ -57,11 +57,11 @@ const LoginPage: React.FC = () => {
         if(data.user.role === 'Admin') {
           alert('Giriş başarılı! Admin sayfasına yönlendiriliyorsunuz...');
           navigate('/adminpage');
-        } else if(data.user.role === 'User') {
+        } else if(data.user.role === 'Normal') {
           alert('Giriş başarılı! Ana menüye yönlendiriliyorsunuz...');
           navigate('/mainmenu');
         }
-        else {
+        else if(data.user.role === 'Library') {
           alert('Giriş başarılı! Kütüphane sayfasına yönlendiriliyorsunuz...');
           navigate('/librarypage');
         }
