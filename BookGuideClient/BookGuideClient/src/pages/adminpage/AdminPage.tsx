@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   BookOpen,
   LogOut,
@@ -57,6 +57,7 @@ const BookList: React.FC = () => {
       fileName: null,
       selectedFile: null
     });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -185,11 +186,16 @@ const BookList: React.FC = () => {
       .catch(() => alert('Dosya görüntülenemedi.'));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Token'ı sil
+    navigate('/login'); // Giriş sayfasına yönlendir
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f4efe8]">
       <header className="bg-[#660000] shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/admin" className="flex items-center">
+          <Link to="/adminpage" className="flex items-center">
             <BookOpen size={32} className="text-white mr-2" />
             <span className="text-xl font-bold text-white">BookGuide Admin</span>
           </Link>
@@ -204,13 +210,10 @@ const BookList: React.FC = () => {
               Ödünç Kitaplar
             </Link>
           </nav>
-          <div className="flex items-center space-x-4">
-            <Link to="/settings" className="p-2 text-white hover:text-gray-300 rounded-full">
-              <Settings size={20} />
-            </Link>
-            <Link to="/logout" className="p-2 text-white hover:text-gray-300 rounded-full">
+          <div className="flex items-center space-x-4"> {/* onClick eklendi ve Link div ile değiştirildi */}
+            <div onClick={handleLogout} className="p-2 text-white hover:text-gray-300 rounded-full cursor-pointer">
               <LogOut size={20} />
-            </Link>
+            </div>
           </div>
         </div>
       </header>

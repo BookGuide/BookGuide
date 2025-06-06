@@ -164,14 +164,6 @@ const LoginPage: React.FC = () => {
                 <label htmlFor="password" className="block text-sm font-medium text-[#472425]">
                   Şifre <span className="text-red-500">*</span>
                 </label>
-                <button
-                  type="button"
-                  onClick={handleForgotPassword}
-                  className="text-xs font-medium text-[#8c1c13] hover:text-[#630000] hover:underline transition-colors focus:outline-none focus:underline"
-                  tabIndex={0}
-                >
-                  Şifremi Unuttum
-                </button>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -235,21 +227,10 @@ const LoginPage: React.FC = () => {
             </p>
           </div>
 
-          {/* Geri Dön Butonu */}
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={handleBackToHome}
-              className="flex items-center text-[#5f4b44] hover:text-[#8c1c13] transition-colors focus:outline-none"
-              tabIndex={0}
-            >
-              <ChevronLeft size={16} className="mr-1" />
-              Ana Sayfaya Dön
-            </button>
-          </div>
 
           {/* Alt Bilgi */}
           <div className="mt-6 text-center text-[#5f4b44]/80 text-sm">
-            &copy; {new Date().getFullYear()} Kütüphane Yönetim Sistemi. Tüm hakları saklıdır.
+            &copy; {new Date().getFullYear()} Kütüphane Yönetim Sistemi.
           </div>
         </div>
       </div>

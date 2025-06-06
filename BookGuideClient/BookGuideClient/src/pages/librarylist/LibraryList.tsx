@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   BookOpen,
   LogOut,
@@ -23,6 +23,7 @@ const LibraryList: React.FC = () => {
   });
   const [showAddForm, setShowAddForm] = useState(false);
 
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchLibraries = async () => {
       try {
@@ -107,13 +108,18 @@ const LibraryList: React.FC = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Token'ı sil
+    navigate('/login'); // Giriş sayfasına yönlendir
+  };
+
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f4efe8]">
       {/* Navbar */}
       <header className="bg-[#660000] shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/admin" className="flex items-center">
+          <Link to="/adminpage" className="flex items-center">
             <BookOpen size={32} className="text-white mr-2" />
             <span className="text-xl font-bold text-white">BookGuide Admin</span>
           </Link>
@@ -128,10 +134,7 @@ const LibraryList: React.FC = () => {
               Ödünç Kitaplar
             </Link>
           </nav>
-          <div className="flex items-center space-x-4">
-            <Link to="/settings" className="p-2 text-white hover:text-gray-300 rounded-full">
-              <Settings size={20} />
-            </Link>
+          <div className="flex items-center space-x-4 cursor-pointer" onClick={handleLogout}> {/* onClick eklendi */}
             <Link to="/logout" className="p-2 text-white hover:text-gray-300 rounded-full">
               <LogOut size={20} />
             </Link>
@@ -263,12 +266,6 @@ const LibraryList: React.FC = () => {
             <div className="flex items-center mb-4 md:mb-0">
               <BookOpen size={24} className="text-[#660000] mr-2" />
               <span className="text-lg font-bold text-[#472425]">BookGuide</span>
-            </div>
-            <div className="flex space-x-6">
-              <Link to="/help" className="text-[#5f4b44] hover:text-[#660000]">Yardım</Link>
-              <Link to="/contact" className="text-[#5f4b44] hover:text-[#660000]">İletişim</Link>
-              <Link to="/privacy" className="text-[#5f4b44] hover:text-[#660000]">Gizlilik</Link>
-              <Link to="/terms" className="text-[#5f4b44] hover:text-[#660000]">Kullanım Şartları</Link>
             </div>
           </div>
           <div className="mt-4 text-center text-[#5f4b44]/80 text-sm">

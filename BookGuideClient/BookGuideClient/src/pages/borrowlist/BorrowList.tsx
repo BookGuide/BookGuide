@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { BookOpen, Loader2, Settings, LogOut, ClipboardList } from 'lucide-react';
 
 interface BorrowingRecord {
@@ -15,6 +15,7 @@ const BorrowList = () => {
   const [borrowings, setBorrowings] = useState<BorrowingRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBorrowings = async () => {
@@ -74,11 +75,16 @@ const BorrowList = () => {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Token'ı sil
+    navigate('/login'); // Giriş sayfasına yönlendir
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f4efe8]">
       <header className="bg-[#660000] shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/admin" className="flex items-center">
+          <Link to="/adminpage" className="flex items-center">
             <BookOpen size={32} className="text-white mr-2" />
             <span className="text-xl font-bold text-white">BookGuide Admin</span>
           </Link>
@@ -87,9 +93,10 @@ const BorrowList = () => {
             <Link to="/booklist" className="text-white hover:text-gray-300 font-medium">Kitaplar</Link>
             <Link to="/borrowlist" className="text-white hover:text-gray-300 font-medium">Ödünç Kitaplar</Link>
           </nav>
-          <div className="flex items-center space-x-4">
-            <Link to="/settings" className="p-2 text-white hover:text-gray-300 rounded-full"><Settings size={20} /></Link>
-            <Link to="/logout" className="p-2 text-white hover:text-gray-300 rounded-full"><LogOut size={20} /></Link>
+          <div className="flex items-center space-x-4"> {/* onClick eklendi ve Link div ile değiştirildi */}
+            <div onClick={handleLogout} className="p-2 text-white hover:text-gray-300 rounded-full cursor-pointer">
+              <LogOut size={20} />
+            </div>
           </div>
         </div>
       </header>
