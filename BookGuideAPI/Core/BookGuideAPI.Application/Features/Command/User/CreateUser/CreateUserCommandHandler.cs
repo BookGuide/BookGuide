@@ -32,6 +32,19 @@ namespace BookGuideAPI.Application.Features.Command.User.CreateUser
             };
 
             var library = await _libraryReadRepository.GetLibraryIdByNameAsync(request.LibraryName);
+            if(library != null)
+            {
+                await _userWriteRepository.AddAsync(new Domain.Entities.User
+                {
+                    Username = request.Username,
+                    CreatedAt = DateTime.UtcNow,
+                    Email = request.Email,
+                    Id = Guid.NewGuid(),
+                    Role = request.User_Role,
+                    HashedPassword = await _hashPassword.HashPasswordAsync(request.RawPassword),
+                    LibraryId = library.Id,
+                });
+            }
             await _userWriteRepository.AddAsync(new Domain.Entities.User
             {
                 Username = request.Username,
@@ -40,7 +53,6 @@ namespace BookGuideAPI.Application.Features.Command.User.CreateUser
                 Id = Guid.NewGuid(),
                 Role = request.User_Role,
                 HashedPassword = await _hashPassword.HashPasswordAsync(request.RawPassword),
-                LibraryId = library.Id,
             });
 
             var response = await _userWriteRepository.SaveChangesAsync();

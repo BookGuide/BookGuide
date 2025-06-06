@@ -20,9 +20,21 @@ namespace BookGuideAPI.Persistence.Repositories
 
         DbSet<Borrowing> Table => _context.Set<Borrowing>();
 
+        public Task<List<Borrowing>> GetAdminsBorrowingsAsync()
+        {
+            return Table
+                .Include(b => b.User)
+                .Include(b => b.Book)
+                .Include(b => b.Library)
+                .ToListAsync();
+        }
+
         public Task<List<Borrowing>> GetLibrariesBorrowingsAsync(Guid libraryId)
         {
             return Table
+                .Include(b => b.User)
+                .Include(b => b.Book)
+                .Include(b => b.Library)
                 .Where(b => b.LibraryId == libraryId)
                 .ToListAsync();
         }

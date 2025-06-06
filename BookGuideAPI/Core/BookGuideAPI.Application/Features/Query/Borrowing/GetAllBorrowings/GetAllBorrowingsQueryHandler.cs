@@ -20,7 +20,7 @@ namespace BookGuideAPI.Application.Features.Query.Borrowing.GetAllBorrowings
 
         public async Task<GetAllBorrowingsQueryResponse> Handle(GetAllBorrowingsQueryRequest request, CancellationToken cancellationToken)
         {
-            var borrowings = await _borrowingReadRepository.GetAllAsync();
+            var borrowings = await _borrowingReadRepository.GetAdminsBorrowingsAsync();
 
             if (borrowings == null || !borrowings.Any())
             {
@@ -37,7 +37,7 @@ namespace BookGuideAPI.Application.Features.Query.Borrowing.GetAllBorrowings
                 BookName = b.Book.Title,
                 StartDate = b.StartDate,
                 EndDate = b.EndDate,
-                Status = b.Status.ToString(),
+                Status = b.Status,
                 LibraryName = b.Library.Name
             }).ToList();
 

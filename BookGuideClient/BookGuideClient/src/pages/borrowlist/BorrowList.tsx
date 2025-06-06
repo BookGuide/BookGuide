@@ -7,7 +7,7 @@ interface BorrowingRecord {
   bookName: string;
   startDate: string;
   endDate: string;
-  status: string;
+  status: 'Pending' | 'Active' | 'Completed' | 'Overdue' | 'Canceled' | 'Lost';
   libraryName: string;
 }
 

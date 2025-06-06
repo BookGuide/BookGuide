@@ -1,4 +1,5 @@
 ﻿using BookGuideAPI.Application.Repositories;
+using BookGuideAPI.Application.Services;
 using BookGuideAPI.Application.ViewModel;
 using MediatR;
 using System;
@@ -12,15 +13,18 @@ namespace BookGuideAPI.Application.Features.Query.Borrowing.GetLibrariesBorrowin
     public class GetLibrariesBorrowingsQueryHandler : IRequestHandler<GetLibrariesBorrowingsQueryRequest, GetLibrariesBorrowingsQueryResponse>
     {
         private readonly IBorrowingReadRepository _borrowingReadRepository;
-        public GetLibrariesBorrowingsQueryHandler(IBorrowingReadRepository borrowingReadRepository)
+        private readonly IUserContext _userContext;
+        public GetLibrariesBorrowingsQueryHandler(IBorrowingReadRepository borrowingReadRepository, IUserContext userContext)
         {
             _borrowingReadRepository = borrowingReadRepository;
+            _userContext = userContext;
         }
         public async Task<GetLibrariesBorrowingsQueryResponse> Handle(GetLibrariesBorrowingsQueryRequest request, CancellationToken cancellationToken)
         {
-            var libraryId = Guid.NewGuid();// TODO : Take This From Token
+            var libraryId = _userContext.LibraryId;
+            if(libraryId == null) { return new GetLibrariesBorrowingsQueryResponse { Succeded = false }; }
 
-            var borrowings = await _borrowingReadRepository.GetLibrariesBorrowingsAsync(libraryId);
+            var borrowings = await _borrowingReadRepository.GetLibrariesBorrowingsAsync((Guid)libraryId);
 
             var borrowingViewModels = borrowings.Select(b => new BorrowingRecordViewModel
             {
@@ -28,7 +32,7 @@ namespace BookGuideAPI.Application.Features.Query.Borrowing.GetLibrariesBorrowin
                 BookName = b.Book.Title,
                 StartDate = b.StartDate,
                 EndDate = b.EndDate,
-                Status = b.Status.ToString(),
+                Status = b.Status,
                 LibraryName = b.Library.Name
             }).ToList();
 
