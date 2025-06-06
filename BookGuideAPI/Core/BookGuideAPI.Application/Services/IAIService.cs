@@ -8,6 +8,6 @@ namespace BookGuideAPI.Application.Services
 {
     public interface IAIService
     {
-        Task<string> GetResponseAsync(string prompt);
+        
     }
 }

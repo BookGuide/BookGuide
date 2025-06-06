@@ -1,21 +1,21 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from "../pages/login/LoginPage"
-import RegisterPage from "../pages/register/RegisterPage"
-
-
+import { Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from "../pages/login/LoginPage";
+import RegisterPage from "../pages/register/RegisterPage";
+import AdminPage from '../pages/adminpage/AdminPage';
+import MainMenu from '../pages/mainmenu/MainMenu';
+import LibraryPage from '../pages/librarypage/LibraryPage';
 
 const AppRouter: React.FC = () => {
   return (
-    <Router>
-      <Routes>
-        {/* Ana sayfa açıldığında doğrudan LoginPage'e yönlendir */}
-        <Route path="/" element={<LoginPage/>} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        {/* Burada diğer sayfalar için rotalar eklenebilir */}
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/adminpage" element={<AdminPage />} />
+      <Route path="/mainmenu" element={<MainMenu />} />
+      <Route path="/librarypage" element={<LibraryPage />} />
+    </Routes>
   );
 };
 

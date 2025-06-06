@@ -1,4 +1,4 @@
-﻿using BookGuideAPI.Application.Services;
+using BookGuideAPI.Application.Services;
 using BookGuideAPI.Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -13,8 +13,8 @@ namespace BookGuideAPI.Infrastructure
     {
         public static void AddInfrastructureServices(this IServiceCollection services)
         {
-            services.AddScoped<IStorageService, StorageService>();
             services.AddScoped<IAIService,AIService>();
+            services.AddScoped<IUserContext, UserContext>();
         }
 
     }

@@ -1,11 +1,5 @@
 ﻿using BookGuideAPI.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BookGuideAPI.Persistence.Contexts
 {
@@ -27,32 +21,44 @@ namespace BookGuideAPI.Persistence.Contexts
             modelBuilder.Entity<LibraryBook>()
                 .HasOne(lb => lb.Book)
                 .WithMany(b => b.LibraryBooks)
-                .HasForeignKey(lb => lb.BookId);
+                .HasForeignKey(lb => lb.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<LibraryBook>()
                 .HasOne(lb => lb.Library)
                 .WithMany(l => l.LibraryBooks)
-                .HasForeignKey(lb => lb.LibraryId);
+                .HasForeignKey(lb => lb.LibraryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Borrowing>()
                 .HasOne(b => b.User)
                 .WithMany(u => u.Borrowings)
-                .HasForeignKey(b => b.UserId);
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Borrowing>()
                 .HasOne(b => b.Book)
                 .WithMany(bk => bk.Borrowings)
-                .HasForeignKey(b => b.BookId);
+                .HasForeignKey(b => b.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Borrowing>()
                 .HasOne(b => b.Library)
                 .WithMany(l => l.Borrowings)
-                .HasForeignKey(b => b.LibraryId);
+                .HasForeignKey(b => b.LibraryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<OnlineBook>()
                 .HasOne(ob => ob.Book)
                 .WithOne(b => b.OnlineBook)
-                .HasForeignKey<OnlineBook>(ob => ob.BookId);
+                .HasForeignKey<OnlineBook>(ob => ob.BookId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.Library)
+                .WithMany()
+                .HasForeignKey(u => u.LibraryId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<User>()
                 .Property(u => u.Role)
@@ -61,6 +67,14 @@ namespace BookGuideAPI.Persistence.Contexts
             modelBuilder.Entity<Book>()
                 .Property(b => b.Category)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username)
+                .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
     }
 }
