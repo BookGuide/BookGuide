@@ -21,6 +21,13 @@ namespace BookGuideAPI.Persistence.Repositories
 
         public DbSet<Library> Table => _context.Set<Library>();
 
+        public async Task<Library> GetLibraryIdByNameAsync(string libraryName)
+        {
+            return await Table
+                .Where(lb => lb.Name == libraryName)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<List<string>> GetLibraryNamesAsync()
         {
             return await Table

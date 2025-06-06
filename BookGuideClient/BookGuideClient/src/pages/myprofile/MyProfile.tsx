@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   User,
   BookOpen,
@@ -46,6 +46,7 @@ const MyProfile: React.FC = () => {
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState({ ...profile });
+  const navigate = useNavigate();
 
   const toggleEditMode = () => {
     if (isEditing) {
@@ -69,6 +70,11 @@ const MyProfile: React.FC = () => {
     setEditedProfile(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Token'ı sil
+    navigate('/login'); // Giriş sayfasına yönlendir
+  };
+
   const placeholderImage = 'https://via.placeholder.com/150';
 
   return (
@@ -76,23 +82,23 @@ const MyProfile: React.FC = () => {
       {/* Navbar */}
       <header className="bg-[#660000] shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="flex items-center">
+          <Link to="/mainmenu" className="flex items-center"> {/* Ana menüye yönlendirme düzeltildi */}
             <BookOpen size={32} className="text-white mr-2" />
             <span className="text-xl font-bold text-white">BookGuide</span>
           </Link>
           <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-white hover:text-gray-300 font-medium">Ana Sayfa</Link>
-            <Link to="/books" className="text-white hover:text-gray-300 font-medium">Kitaplar</Link>
-            <Link to="/dashboard" className="text-white hover:text-gray-300 font-medium">Panelim</Link>
-            <Link to="/profile" className="text-white font-medium">Profilim</Link>
+            <Link to="/mainmenu" className="text-white hover:text-gray-300 font-medium">Ana Sayfa</Link>
+            <Link to="/viewallbooks" className="text-white hover:text-gray-300 font-medium">Kitap Listesi</Link> {/* Kitap listesi için doğru yol */}
+            <Link to="/history" className="text-white hover:text-gray-300 font-medium">Geçmişim</Link>
+            <Link to="/myprofile" className="text-white font-medium">Profilim</Link> {/* Mevcut sayfa olduğu için /profile yerine /myprofile */}
           </nav>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-4 ">
             <Link to="/settings" className="p-2 text-white hover:text-gray-300 rounded-full">
               <Settings size={20} />
             </Link>
-            <Link to="/logout" className="p-2 text-white hover:text-gray-300 rounded-full">
+            <div onClick={handleLogout} className="p-2 text-white hover:text-gray-300 rounded-full cursor-pointer"> {/* onClick eklendi ve Link div ile değiştirildi */}
               <LogOut size={20} />
-            </Link>
+            </div>
           </div>
         </div>
       </header>

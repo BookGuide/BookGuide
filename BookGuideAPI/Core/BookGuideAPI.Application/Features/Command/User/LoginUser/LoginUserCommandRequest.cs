@@ -11,6 +11,5 @@ namespace BookGuideAPI.Application.Features.Command.User.LoginUser
     {
         public string  Username { get; set; }
         public string  RawPassword { get; set; }
-        public string LibraryName { get; set; }
     }
 }

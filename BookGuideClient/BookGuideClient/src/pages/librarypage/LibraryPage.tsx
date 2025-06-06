@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   BookOpen,
   LogOut,
@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 
 const LibraryPage: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen flex flex-col bg-[#f4efe8]">
       {/* Navbar */}
@@ -29,10 +31,12 @@ const LibraryPage: React.FC = () => {
             </Link>
           </nav>
           <div className="flex items-center space-x-4">
-            {/* Kullanıcı ayarları veya çıkış */}
-            <Link to="/loginpage" className="p-2 text-white hover:text-gray-300 rounded-full">
+            {/* Çıkış */}
+            {/* onClick eklendi ve Link div ile değiştirildi */}
+            <div onClick={() => { localStorage.removeItem('token'); navigate('/login'); }}
+                 className="p-2 text-white hover:text-gray-300 rounded-full cursor-pointer">
               <LogOut size={20} />
-            </Link>
+            </div>
           </div>
         </div>
       </header>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   BookOpen,
   LogOut,
@@ -24,7 +24,7 @@ interface BookDetails {
 }
 
 interface DisplayLibraryBook {
-  libraryBookId: string;
+  libraryBookId: string; // This should always be a valid string for React keys
   bookInfo: BookDetails;
   totalCount: number;
   availableCount: number;
@@ -36,23 +36,36 @@ const LibraryBookList: React.FC = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [allSystemBooks, setAllSystemBooks] = useState<BookDetails[]>([]);
   const [newRecord, setNewRecord] = useState<{ bookId: string; totalCount: number; availableCount: number }>({ bookId: '', totalCount: 1, availableCount: 1 });
+  const [editingBookId, setEditingBookId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<{ totalCount: string; availableCount: string }>({
+    totalCount: '',
+    availableCount: '',
+  });
+  const navigate = useNavigate();
 
-   const getLibraryIdFromToken = (): string | null => {
+  const getLibraryIdFromToken = (): string | null => {
     const token = localStorage.getItem('token');
-    if (!token) return null;
+    if (!token) {
+      return null;
+    }
     try {
       const decoded: any = jwtDecode(token);
-      return decoded['library_id'] || null;
-    } catch {
+      const libraryIdClaim = decoded['library_id'];
+      if (libraryIdClaim) {
+        return libraryIdClaim;
+      } else {
+        return null;
+      }
+    } catch (error) {
+      console.error('[Debug] Token çözümlenirken hata oluştu:', error);
       return null;
     }
   };
 
-  const libraryId = getLibraryIdFromToken();
-
   useEffect(() => {
+    const libraryId = getLibraryIdFromToken();
+
     const fetchBooksAndInventory = async () => {
-      setIsLoading(true);
       try {
         const booksRes = await fetch('https://localhost:7127/api/Book/GetBooks');
         const booksData = await booksRes.json();
@@ -60,14 +73,45 @@ const LibraryBookList: React.FC = () => {
         const inventoryRes = await fetch(`https://localhost:7127/api/LibraryBook/GetLibraryBooks?LibraryId=${libraryId}`);
         const inventoryData = await inventoryRes.json();
 
-        if (booksData.succeeded && inventoryData.succeeded) {
+        if (!booksRes.ok) {
+          console.error("Error fetching books:", booksData);
+          alert(`Kitap listesi yüklenirken hata oluştu: ${booksData.message || 'Sunucu hatası'}`);
+          return;
+        }
+        if (!inventoryRes.ok) {
+          console.error("Error fetching inventory data:", inventoryData);
+          alert(`Kütüphane envanteri yüklenirken hata oluştu: ${inventoryData.message || 'Sunucu hatası'}`);
+          return;
+        }
+
+        if (booksData.succeeded && inventoryData.succeeded && booksData.books && inventoryData.books) {
           const books: BookDetails[] = booksData.books;
           setAllSystemBooks(books);
+          // Define type for library book data coming from the API
+          type ApiLibraryBook = { id?: string; libraryBookId?: string; bookId: string; totalCount: number; availableCount: number };
+          const libraryBooks = inventoryData.books.map((libBook: ApiLibraryBook) => {
+            let currentLibraryBookId = libBook.id; // Prefer 'id'
+            if (!currentLibraryBookId && libBook.libraryBookId) {
+              // Fallback to 'libraryBookId' if 'id' is missing but 'libraryBookId' exists
+              console.warn(
+                "[Warning] Kütüphane kitap verisi 'id' alanı olmadan geldi, ancak 'libraryBookId' alanı bulundu ve kullanılıyor. Lütfen backend API'nin (/api/LibraryBook/GetLibraryBooks) veri yapısını kontrol ederek 'id' alanının tutarlı bir şekilde gönderildiğinden emin olun. Gelen veri:",
+                libBook
+              );
+              currentLibraryBookId = libBook.libraryBookId;
+            } else if (!currentLibraryBookId) {
+              // If no usable ID is found
+              console.error(
+                "[ERROR] Kütüphane kitap verisi için geçerli bir ID ('id' veya 'libraryBookId') bulunamadı. Bu kayıt listelemede sorunlara veya hatalara neden olabilir. Gelen veri:",
+                libBook
+              );
+              // To prevent errors, you might want to assign a temporary unique ID or filter out this record.
+              // For now, we'll let it pass, but it will likely cause key warnings if currentLibraryBookId remains undefined.
+              // A better approach for production would be to filter it or assign a placeholder if absolutely necessary.
+            }
 
-          const libraryBooks: DisplayLibraryBook[] = inventoryData.books.map((libBook: any) => {
             const bookDetail = books.find(b => b.id === libBook.bookId);
             return {
-              libraryBookId: libBook.id,
+              libraryBookId: currentLibraryBookId || `fallback-${Math.random().toString(36).substr(2, 9)}`, // Ensure libraryBookId is always a string
               bookInfo: bookDetail || {
                 id: libBook.bookId,
                 title: 'Bilinmeyen Kitap',
@@ -78,25 +122,41 @@ const LibraryBookList: React.FC = () => {
               totalCount: libBook.totalCount,
               availableCount: libBook.availableCount
             };
-          });
+          }).filter(book => book.libraryBookId && !book.libraryBookId.startsWith('fallback-')); // Filter out items where a proper ID couldn't be established
 
-          setDisplayBooks(libraryBooks);
-          if (books.length > 0) {
+          setDisplayBooks(libraryBooks as DisplayLibraryBook[]);
+          if (books.length > 0 && newRecord.bookId === '') {
             setNewRecord(prev => ({ ...prev, bookId: books[0].id }));
           }
+        } else {
+          alert('Veri alınırken bir sorun oluştu. Lütfen daha sonra tekrar deneyin.');
         }
       } catch (err) {
-        alert('Veriler yüklenirken hata oluştu.');
+        console.error("Network or other error in fetchBooksAndInventory:", err);
+        alert('Veriler yüklenirken bir ağ hatası veya başka bir sorun oluştu.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchBooksAndInventory();
-  }, []);
+    if (libraryId) {
+      setIsLoading(true);
+      fetchBooksAndInventory();
+    } else {
+      setIsLoading(false);
+      alert('Kütüphane bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+      navigate('/login');
+    }
+  }, [navigate]);
 
   const handleAddLibraryBookRecord = async (e: React.FormEvent) => {
     e.preventDefault();
+    const libraryId = getLibraryIdFromToken();
+    if (!libraryId) {
+      alert('Oturumunuz sonlanmış veya kütüphane bilgisi eksik. Lütfen tekrar giriş yapın.');
+      navigate('/login');
+      return;
+    }
     try {
       const response = await fetch('https://localhost:7127/api/LibraryBook/AddLibraryBook', {
         method: 'POST',
@@ -113,11 +173,112 @@ const LibraryBookList: React.FC = () => {
         alert('Kitap başarıyla eklendi.');
         window.location.reload();
       } else {
-        alert('Ekleme işlemi başarısız.');
+        alert(`Ekleme işlemi başarısız: ${data.message || 'Bilinmeyen bir hata oluştu.'}`);
       }
-    } catch {
-      alert('Sunucu hatası oluştu.');
+    } catch (error) {
+      console.error('Kitap ekleme hatası:', error);
+      alert('Sunucu hatası oluştu veya ağ bağlantısı sorunu.');
     }
+  };
+
+  const handleEdit = (book: DisplayLibraryBook): void => {
+    setEditingBookId(book.libraryBookId);
+    setEditFormData({
+      totalCount: book.totalCount.toString(),
+      availableCount: book.availableCount.toString(),
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingBookId(null);
+  };
+
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleUpdateStock = async (libraryBookId: string) => {
+    if (!libraryBookId) {
+        alert('Güncellenecek kitap için geçerli bir ID bulunamadı.');
+        console.error("handleUpdateStock called with invalid libraryBookId:", libraryBookId);
+        return;
+    }
+    const totalCount = parseInt(editFormData.totalCount, 10);
+    const availableCount = parseInt(editFormData.availableCount, 10);
+
+    if (isNaN(totalCount) || isNaN(availableCount)) {
+      alert('Lütfen geçerli stok miktarları girin.');
+      return;
+    }
+    if (totalCount < 0 || availableCount < 0) {
+      alert('Stok miktarları negatif olamaz.');
+      return;
+    }
+    if (availableCount > totalCount) {
+      alert('Mevcut stok adedi, toplam stok adedinden fazla olamaz.');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Oturumunuz sonlanmış. Lütfen tekrar giriş yapın.');
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch('https://localhost:7127/api/LibraryBook/UpdateLibraryBook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          id: libraryBookId,
+          totalCount: totalCount,
+          availableCount: availableCount,
+        }),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Sunucu yanıtı JSON olarak parse edilemedi:', jsonError);
+        console.error('Yanıt durumu:', response.status, 'Durum metni:', response.statusText);
+        const textResponse = await response.text().catch(() => 'Yanıt metni okunamadı.');
+        console.error('Ham yanıt metni:', textResponse);
+        alert(`Stok güncellenemedi: Sunucudan beklenmedik yanıt (HTTP ${response.status}). Detaylar için konsolu kontrol edin.`);
+        return;
+      }
+
+      if (response.ok && data.succeeded) {
+        alert('Stok başarıyla güncellendi.');
+        setDisplayBooks(prevBooks =>
+          prevBooks.map(b =>
+            b.libraryBookId === libraryBookId
+              ? { ...b, totalCount: totalCount, availableCount: availableCount }
+              : b
+          ));
+        setEditingBookId(null);
+      } else {
+        console.error('Stok güncelleme başarısız. Sunucu yanıtı:', data);
+        console.error('Yanıt durumu:', response.status, 'Durum metni:', response.statusText);
+        alert(`Stok güncellenemedi: ${data.message || response.statusText || `Sunucu hatası (HTTP ${response.status})`}`);
+      }
+    } catch (error) {
+      console.error('Stok güncelleme sırasında genel hata:', error);
+      alert('Stok güncellenirken bir ağ hatası veya başka bir sorun oluştu. Detaylar için konsolu kontrol edin.');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
   };
 
   return (
@@ -133,9 +294,9 @@ const LibraryBookList: React.FC = () => {
             <Link to="/libraryborrowpage" className="text-white hover:text-gray-300 font-medium">Ödünç Kitaplar</Link>
           </nav>
           <div className="flex items-center space-x-4">
-            <Link to="/loginpage" className="p-2 text-white hover:text-gray-300 rounded-full">
+            <div onClick={handleLogout} className="p-2 text-white hover:text-gray-300 rounded-full cursor-pointer" title="Çıkış Yap">
               <LogOut size={20} />
-            </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -163,10 +324,10 @@ const LibraryBookList: React.FC = () => {
                 name="bookId"
                 value={newRecord.bookId}
                 onChange={(e) => setNewRecord({ ...newRecord, bookId: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#660000] focus:border-[#660000]"
                 required
               >
-                {allSystemBooks.map(book => (
+                {allSystemBooks.map((book: BookDetails) => (
                   <option key={book.id} value={book.id}>{book.title} - ({book.author})</option>
                 ))}
               </select>
@@ -176,9 +337,9 @@ const LibraryBookList: React.FC = () => {
               <input
                 type="number"
                 value={newRecord.totalCount}
-                onChange={(e) => setNewRecord({ ...newRecord, totalCount: parseInt(e.target.value) })}
+                onChange={(e) => setNewRecord({ ...newRecord, totalCount: parseInt(e.target.value) || 0 })}
                 min={1}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#660000] focus:border-[#660000]"
                 required
               />
             </div>
@@ -187,10 +348,10 @@ const LibraryBookList: React.FC = () => {
               <input
                 type="number"
                 value={newRecord.availableCount}
-                onChange={(e) => setNewRecord({ ...newRecord, availableCount: parseInt(e.target.value) })}
+                onChange={(e) => setNewRecord({ ...newRecord, availableCount: parseInt(e.target.value) || 0 })}
                 min={0}
                 max={newRecord.totalCount}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#660000] focus:border-[#660000]"
                 required
               />
             </div>
@@ -219,16 +380,58 @@ const LibraryBookList: React.FC = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Toplam</th>
                   <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Mevcut</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {displayBooks.map(book => (
+                {displayBooks.map((book: DisplayLibraryBook) => (
                   <tr key={book.libraryBookId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-900">{book.bookInfo.title}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{book.bookInfo.author}</td>
-                    <td className="px-6 py-4 text-sm text-gray-700">{book.bookInfo.category}</td>
-                    <td className="px-6 py-4 text-sm text-center text-gray-700">{book.totalCount}</td>
-                    <td className="px-6 py-4 text-sm text-center text-gray-700">{book.availableCount}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{book.bookInfo.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{book.bookInfo.author}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{book.bookInfo.category}</td>
+                    {editingBookId === book.libraryBookId ? (
+                      <>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                          <input
+                            type="number"
+                            name="totalCount"
+                            value={editFormData.totalCount}
+                            onChange={handleEditFormChange}
+                            className="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-center focus:outline-none focus:ring-1 focus:ring-[#660000] focus:border-[#660000]"
+                            min="0"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                          <input
+                            type="number"
+                            name="availableCount"
+                            value={editFormData.availableCount}
+                            onChange={handleEditFormChange}
+                            className="w-20 p-1 border border-gray-300 rounded-md shadow-sm text-center focus:outline-none focus:ring-1 focus:ring-[#660000] focus:border-[#660000]"
+                            min="0"
+                            max={editFormData.totalCount}
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center space-x-2">
+                          <button onClick={() => handleUpdateStock(book.libraryBookId)} className="text-green-600 hover:text-green-700 p-1" title="Kaydet">
+                            <CheckCircle2 size={20} />
+                          </button>
+                          <button onClick={handleCancelEdit} className="text-red-600 hover:text-red-700 p-1" title="İptal">
+                            <XCircle size={20} />
+                          </button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-700">{book.totalCount}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-700">{book.availableCount}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                          <button onClick={() => handleEdit(book)} className="text-blue-600 hover:text-blue-700 p-1" title="Düzenle">
+                            <Edit3 size={20} />
+                          </button>
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
