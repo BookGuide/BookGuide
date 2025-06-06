@@ -14,7 +14,6 @@ namespace BookGuideAPI.Application.Features.Command.Borrowing.AddBorrowing
         public Guid BookId { get; set; }
         public Guid LibraryId { get; set; }
 
-        public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
     }
 }

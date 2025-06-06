@@ -80,29 +80,24 @@ const MyProfile: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#f4efe8]">
       {/* Navbar */}
-      <header className="bg-[#660000] shadow-md">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/mainmenu" className="flex items-center"> {/* Ana menüye yönlendirme düzeltildi */}
-            <BookOpen size={32} className="text-white mr-2" />
-            <span className="text-xl font-bold text-white">BookGuide</span>
-          </Link>
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/mainmenu" className="text-white hover:text-gray-300 font-medium">Ana Sayfa</Link>
-            <Link to="/viewallbooks" className="text-white hover:text-gray-300 font-medium">Kitap Listesi</Link> {/* Kitap listesi için doğru yol */}
-            <Link to="/history" className="text-white hover:text-gray-300 font-medium">Geçmişim</Link>
-            <Link to="/myprofile" className="text-white font-medium">Profilim</Link> {/* Mevcut sayfa olduğu için /profile yerine /myprofile */}
-          </nav>
-          <div className="flex items-center space-x-4 ">
-            <Link to="/settings" className="p-2 text-white hover:text-gray-300 rounded-full">
-              <Settings size={20} />
-            </Link>
-            <div onClick={handleLogout} className="p-2 text-white hover:text-gray-300 rounded-full cursor-pointer"> {/* onClick eklendi ve Link div ile değiştirildi */}
-              <LogOut size={20} />
-            </div>
-          </div>
-        </div>
-      </header>
-
+      <nav className="bg-[#660000] shadow-md sticky top-0 z-40">
+              <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div className="flex items-center">
+                  <BookOpen size={32} className="text-white mr-2" />
+                  <Link to="/mainmenu" className="text-2xl font-bold text-white">
+                    BookGuide
+                  </Link>
+                </div>
+                <div className="flex items-center space-x-6">
+                  <Link to="/mainmenu" className="text-white hover:text-gray-300 font-medium">Kitap Listesi</Link>
+                  <Link to="/history" className="text-white hover:text-gray-300 font-medium">Geçmişim</Link>
+                  <Link to="/recommendation" className="text-white hover:text-gray-300 font-medium">Öneriler</Link>
+                  <Link to="/myprofile" className="text-white hover:text-gray-300 font-medium">Profilim</Link>
+                  <Link to="/login" className="text-white hover:text-gray-300 font-medium">Çıkış Yap</Link>
+                </div>
+              </div>
+            </nav>
+            
       <main className="flex-grow py-8">
         <div className="container mx-auto px-4">
           {/* Profile Header */}

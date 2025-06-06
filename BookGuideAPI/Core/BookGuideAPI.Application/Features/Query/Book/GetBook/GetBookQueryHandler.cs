@@ -16,7 +16,7 @@ namespace BookGuideAPI.Application.Features.Query.Book.GetBook
 
         public async Task<GetBookQueryResponse> Handle(GetBookQueryRequest request, CancellationToken cancellationToken)
         {
-            var book = await _bookReadRepository.GetEntityByIdAsync(request.BookId);
+            var book = await _bookReadRepository.GetBookWithRelationsByIdAsync(request.BookId);
 
 
             if (book == null)

@@ -10,5 +10,6 @@ namespace BookGuideAPI.Application.Repositories
     public interface IBookReadRepository : IReadRepository<Book>
     {
         public Task<List<Book>> GetAllBooksAsync();
+        public Task<Book> GetBookWithRelationsByIdAsync(Guid id);
     }
 }
