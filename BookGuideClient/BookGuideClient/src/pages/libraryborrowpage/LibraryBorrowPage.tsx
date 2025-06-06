@@ -26,7 +26,7 @@ const LibraryBorrowPage: React.FC = () => {
     const fetchBorrowingRecords = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch('https://localhost:7127/api/Borrowing/GetLibrariesBorrowing', {
+        const response = await fetch('http://localhost:7127/api/Borrowing/GetLibrariesBorrowing', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',

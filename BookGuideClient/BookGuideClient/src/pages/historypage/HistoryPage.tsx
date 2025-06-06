@@ -18,7 +18,7 @@ const HistoryPage: React.FC = () => {
     const fetchBorrowings = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('https://localhost:7127/api/Borrowing/GetUsersBorrowing', {
+        const res = await fetch('http://localhost:7127/api/Borrowing/GetUsersBorrowing', {
           headers: {
             Authorization: `Bearer ${token}`,
           },

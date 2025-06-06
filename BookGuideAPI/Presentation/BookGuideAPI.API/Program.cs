@@ -8,6 +8,8 @@ using System.Text;
 using BookGuideAPI.API.Middleware;
 using BookGuideAPI.Application.Dtos.Token;
 using System.Text.Json.Serialization;
+using BookGuideAPI.Persistence.Contexts;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,15 +68,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
+app.UseCors("AllowFrontend");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<UserContextMiddleware>();
 
 app.MapControllers();
 
-app.Run();
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<BookGuideDbContext>();
+    dbContext.Database.Migrate();
+}
 
-// TODO: Add Drive File Management, Add Library user
+app.Run();

@@ -67,10 +67,10 @@ const LibraryBookList: React.FC = () => {
 
     const fetchBooksAndInventory = async () => {
       try {
-        const booksRes = await fetch('https://localhost:7127/api/Book/GetBooks');
+        const booksRes = await fetch('http://localhost:7127/api/Book/GetBooks');
         const booksData = await booksRes.json();
 
-        const inventoryRes = await fetch(`https://localhost:7127/api/LibraryBook/GetLibraryBooks?LibraryId=${libraryId}`);
+        const inventoryRes = await fetch(`http://localhost:7127/api/LibraryBook/GetLibraryBooks?LibraryId=${libraryId}`);
         const inventoryData = await inventoryRes.json();
 
         if (!booksRes.ok) {
@@ -122,7 +122,7 @@ const LibraryBookList: React.FC = () => {
               totalCount: libBook.totalCount,
               availableCount: libBook.availableCount
             };
-          }).filter(book => book.libraryBookId && !book.libraryBookId.startsWith('fallback-')); // Filter out items where a proper ID couldn't be established
+          }).filter((book: DisplayLibraryBook) => book.libraryBookId && !book.libraryBookId.startsWith('fallback-'));
 
           setDisplayBooks(libraryBooks as DisplayLibraryBook[]);
           if (books.length > 0 && newRecord.bookId === '') {
@@ -158,7 +158,7 @@ const LibraryBookList: React.FC = () => {
       return;
     }
     try {
-      const response = await fetch('https://localhost:7127/api/LibraryBook/AddLibraryBook', {
+      const response = await fetch('http://localhost:7127/api/LibraryBook/AddLibraryBook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -231,7 +231,7 @@ const LibraryBookList: React.FC = () => {
         return;
       }
 
-      const response = await fetch('https://localhost:7127/api/LibraryBook/UpdateLibraryBook', {
+      const response = await fetch('http://localhost:7127/api/LibraryBook/UpdateLibraryBook', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

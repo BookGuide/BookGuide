@@ -34,7 +34,7 @@ const RegisterPage = () => {
       setLibraryFetchError(null);
       try {
         // LibraryList.tsx dosyasında kullanılan endpoint'i kullanıyoruz
-        const res = await fetch('https://localhost:7127/api/Library/GetLibraries');
+        const res = await fetch('http://localhost:7127/api/Library/GetLibraries');
         const data = await res.json();
         if (data.succeeded && Array.isArray(data.libraries)) {
           const librariesData = data.libraries.map((lib: any) => ({
@@ -98,7 +98,7 @@ const RegisterPage = () => {
     };
 
     try {
-      const response = await fetch('https://localhost:7127/api/Auth/SignUp', {
+      const response = await fetch('http://localhost:7127/api/Auth/SignUp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -156,7 +156,7 @@ const RegisterPage = () => {
   };
 
   // Vite'da resim URL'lerini elde etmek için özelleştirilmiş kod
-  const bookshelfImageUrl = '/src/images/bookshelf.jpg';
+  const bookshelfImageUrl = '../public/images/bookshelf.jpg';
   
   return (
     <div className="min-h-screen flex flex-row bg-gray-100">

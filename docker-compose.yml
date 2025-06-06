@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  BookGuide:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: my-mssql
+    environment:
+      SA_PASSWORD: "Sifre0134"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - bookguide-net
+
+  api:
+    build:
+      context: ./BookGuideAPI
+      dockerfile: Dockerfile
+    ports:
+      - "7127:7127"
+    depends_on:
+      - BookGuide  # MSSQL servisi önce başlasın
+    environment:
+      - ASPNETCORE_URLS=http://+:7127
+      - ConnectionStrings__DefaultConnection=Server=BookGuide,1433;Database=BookGuide;User Id=sa;Password=Sifre0134;TrustServerCertificate=True
+    networks:
+      - bookguide-net
+
+  client:
+    build:
+      context: ./BookGuideClient/BookGuideClient
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+    networks:
+      - bookguide-net
+
+networks:
+  bookguide-net:
+    driver: bridge

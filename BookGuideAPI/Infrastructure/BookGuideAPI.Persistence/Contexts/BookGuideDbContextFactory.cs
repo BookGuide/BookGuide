@@ -13,12 +13,8 @@ namespace BookGuideAPI.Persistence.Contexts
     {
         public BookGuideDbContext CreateDbContext(string[] args)
         {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddUserSecrets<BookGuideDbContext>()
-                .Build();
 
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            var connectionString = "Server=my-mssql,1433;Database=BookGuide;User Id=sa;Password=Sifre0134;TrustServerCertificate=True";
 
             var optionsBuilder = new DbContextOptionsBuilder<BookGuideDbContext>();
             optionsBuilder.UseSqlServer(connectionString);
